@@ -32,16 +32,16 @@ const Room: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [userVoteValue, setUserVoteValue] = useState<number | null>(null)
 
-  // const [revealVotesValue, setRevealVotesValue] = useState(false);
   const [revealVotes, setRevealVotes] = useState(false)
-
   const [hasAnyVotes, setHasAnyVotes] = useState(false)
 
-  const [voteSocket, setVoteSocket] = useState<WebSocket | null>(null)
-  // const [participantSocket, setparticipantSocket] = useState<WebSocket | null>(
-  //   null,
-  // )
-  const [revealSocket, setRevealSocket] = useState<WebSocket | null>(null)
+  const [roomWebSocket, setRoomWebSocket] = useState<WebSocket | null>(null)
+
+  const storiesRef = useRef<Story[]>([])
+
+  useEffect(() => {
+    storiesRef.current = stories
+  }, [stories])
 
   useEffect(() => {
     setParticipantsVoted(
@@ -74,8 +74,6 @@ const Room: React.FC = () => {
   }, [participants])
 
   useEffect(() => {
-    connectToParticipantWebSocket()
-    connectToVoteWebSocket()
     connectToRevealWebSocket()
     fetchRoomData()
   }, [])
@@ -84,25 +82,51 @@ const Room: React.FC = () => {
     activeStoryRef.current = activeStory
   }, [activeStory])
 
-  const connectToParticipantWebSocket = async () => {
+  const connectToRevealWebSocket = async () => {
     if (!roomCode) return
 
     const ws = new WebSocket(
-      `ws://localhost:8000/ws/participant/${roomCode}/?token=${localStorage.getItem(
-        'accessToken',
-      )}`,
+      `wss://simple-planning-poker-backend.onrender.com/ws/reveal/${roomCode}/`,
     )
 
     ws.onopen = () => {
-      console.log('Participant WebSocket connected')
+      console.log('Reveal WebSocket connected')
     }
 
     ws.onmessage = (event) => {
-      console.log('Participant WebSocket message received:', event.data)
+      console.log('Reveal WebSocket message received:', event.data)
       const data = JSON.parse(event.data)
-      console.log('Participant Data', data)
 
-      if (data.type === 'participant_add') {
+      if (data.type === 'reveal_votes') {
+        console.log('Reveal data:', data)
+        if (activeStoryRef.current?.id !== data.reveal.story_id) {
+          console.log('Active story ID does not match')
+          return
+        }
+        setRevealVotes(data.reveal.value)
+      } else if (data.type === 'reset_votes') {
+        if (activeStoryRef.current?.id !== data.reset.story_id) {
+          console.log('Active story ID does not match')
+          return
+        }
+        console.log('Reset data:', data)
+        setParticipants((prevParticipants) =>
+          sortParticipantsByNickname(
+            prevParticipants.map((participant) => ({
+              ...participant,
+              vote: null,
+            })),
+          ),
+        )
+        setRevealVotes(false)
+      } else if (data.type === 'vote_update') {
+        if (activeStoryRef.current?.id !== data.vote.story_id) {
+          console.log('Active story ID does not match')
+          return
+        }
+        console.log('Vote update received:', data)
+        handleVoteUpdate(data.vote)
+      } else if (data.type === 'participant_add') {
         api.get(`/userinfo/${data.participants.id}/`).then((response) => {
           console.log('Participant data:', response.data)
           const newParticipant: Participant = {
@@ -113,7 +137,6 @@ const Room: React.FC = () => {
               moderator: response.data.profile.moderator,
             },
           }
-
           setParticipants((prevParticipants) => {
             const existingParticipant = prevParticipants.find(
               (p) => p.id === newParticipant.id,
@@ -137,91 +160,34 @@ const Room: React.FC = () => {
           console.log('Participant removed:', data.participants)
           return updatedParticipants
         })
-      }
-    }
-
-    ws.onclose = () => {
-      console.log('Participant WebSocket disconnected')
-    }
-
-    return () => {
-      ws.close()
-    }
-  }
-
-  const connectToVoteWebSocket = async () => {
-    if (!roomCode) return
-
-    const ws = new WebSocket(
-      `ws://localhost:8000/ws/room/${roomCode}/?token=${localStorage.getItem(
-        'accessToken',
-      )}`,
-    )
-
-    ws.onopen = () => {
-      console.log('Vote WebSocket connected')
-    }
-
-    ws.onmessage = (event) => {
-      console.log('WebSocket message received:', event.data)
-      const data = JSON.parse(event.data)
-
-      handleVoteUpdate(data)
-    }
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected')
-    }
-
-    setVoteSocket(ws)
-
-    return () => {
-      ws.close()
-    }
-  }
-
-  const connectToRevealWebSocket = async () => {
-    if (!roomCode) return
-
-    const ws = new WebSocket(
-      `ws://localhost:8000/ws/reveal/${roomCode}/?token=${localStorage.getItem(
-        'accessToken',
-      )}`,
-    )
-
-    ws.onopen = () => {
-      console.log('Reveal WebSocket connected')
-    }
-
-    ws.onmessage = (event) => {
-      console.log('Reveal WebSocket message received:', event.data)
-      const data = JSON.parse(event.data)
-
-      if (data.type === 'reveal_votes') {
-        if (activeStoryRef.current?.id !== data.reveal.story_id) {
-          console.log('Active story ID does not match')
-          return
+      } else if (data.type === 'add_story') {
+        console.log('Add story data:', data)
+        const newStory: Story = {
+          id: data.story.id,
+          title: data.story.title,
+          is_revealed: data.story.is_revealed,
         }
-
-        console.log('Reveal data:', data)
-        setRevealVotes(data.reveal.value)
-      } else if (data.type === 'reset_votes') {
-        if (activeStoryRef.current?.id !== data.reset.story_id) {
-          console.log('Active story ID does not match')
-          return
-        }
-
-        console.log('Reset data:', data)
-        setParticipants((prevParticipants) =>
-          sortParticipantsByNickname(
-            prevParticipants.map((participant) => ({
-              ...participant,
-              vote: null,
-            })),
-          ),
+        setStories((prevStories) => [...prevStories, newStory])
+        // handleSetActiveStory(newStory)
+      } else if (data.type === 'remove_story') {
+        console.log('Remove story data:', data)
+        setStories((prevStories) =>
+          prevStories.filter((story) => story.id !== data.story.id),
         )
-
-        setRevealVotes(false)
+        if (
+          activeStoryRef.current?.id === data.story.id &&
+          activeStoryRef.current?.id !== storiesRef.current[0].id
+        ) {
+          console.log('Active story removed, setting to first story')
+          handleSetActiveStory(storiesRef.current[0])
+        } else if (activeStoryRef.current?.id === data.story.id) {
+          console.log('Active story removed, setting to second story')
+          handleSetActiveStory(storiesRef.current[1])
+        } else {
+          console.log('Active story not removed', activeStoryRef.current?.id)
+          console.log('  :', storiesRef.current[0].id)
+          console.log('  :', storiesRef.current[1].id)
+        }
       }
     }
 
@@ -229,7 +195,7 @@ const Room: React.FC = () => {
       console.log('Reveal WebSocket disconnected')
     }
 
-    setRevealSocket(ws)
+    setRoomWebSocket(ws)
 
     return () => {
       ws.close()
@@ -249,15 +215,12 @@ const Room: React.FC = () => {
 
       api.get(`/stories/${roomResponse.data.id}`).then((storiesResponse) => {
         console.log('Stories:', storiesResponse.data)
-        setStories((prevStories) => [
-          ...prevStories,
-          ...storiesResponse.data.map(
-            (story: { id: number; title: string }) => ({
-              id: story.id,
-              title: story.title,
-            }),
-          ),
-        ])
+        setStories(
+          storiesResponse.data.map((story: { id: number; title: string }) => ({
+            id: story.id,
+            title: story.title,
+          })),
+        )
 
         if (sessionStorage.getItem('activeRoomCode') === roomCode) {
           const activeStory = sessionStorage.getItem('activeStory')
@@ -332,7 +295,15 @@ const Room: React.FC = () => {
       title: response.data.title,
       is_revealed: response.data.is_revealed,
     }
-    setStories((prevStories) => [...prevStories, newStoryItem])
+    // setStories((prevStories) => [...prevStories, newStoryItem])
+    console.log('Sending new story to WebSocket:', newStoryItem)
+    roomWebSocket?.send(
+      JSON.stringify({
+        action: 'add_story',
+        story_id: newStoryItem.id,
+        title: newStoryItem.title,
+      }),
+    )
   }
 
   const handleClickStory = (story: Story) => {
@@ -340,6 +311,7 @@ const Room: React.FC = () => {
   }
 
   const handleDeleteStory = async (storyId: number) => {
+    const title = activeStory?.title
     console.log('Active story:', activeStory?.id)
     if (activeStory?.id === storyId && activeStory?.id !== stories[0].id) {
       handleSetActiveStory(stories[0])
@@ -351,9 +323,16 @@ const Room: React.FC = () => {
       prevStories.filter((story) => story.id !== storyId),
     )
 
-    api.delete(`/stories/${storyId}/delete/`).then((response) => {
+    await api.delete(`/stories/${storyId}/delete/`).then((response) => {
       console.log('Delete story:', response.data)
     })
+    roomWebSocket?.send(
+      JSON.stringify({
+        action: 'remove_story',
+        story_id: storyId,
+        title: title,
+      }),
+    )
   }
 
   const handleVote = () => {
@@ -389,17 +368,18 @@ const Room: React.FC = () => {
       .post(`/votes/`, { story_id: activeStory?.id, value: userVoteValue })
       .then((response) => {
         console.log('Vote submitted:', response.data)
-        if (voteSocket?.readyState === WebSocket.OPEN) {
+        if (roomWebSocket?.readyState === WebSocket.OPEN) {
           if (activeStory?.id != null) {
-            voteSocket.send(
+            roomWebSocket.send(
               JSON.stringify({
+                action: 'vote',
                 story_id: activeStory.id,
                 value: userVoteValue,
               }),
             )
           }
         } else {
-          console.warn('Vote WebSocket not ready yet')
+          console.warn('WebSocket not ready yet')
         }
       })
       .catch((error) => {
@@ -408,17 +388,17 @@ const Room: React.FC = () => {
   }
 
   const handleRevealVotes = (revealVotesChange: boolean) => {
-    if (revealSocket?.readyState === WebSocket.OPEN) {
+    if (roomWebSocket?.readyState === WebSocket.OPEN) {
       if (activeStory?.id != null) {
         if (revealVotesChange) {
-          revealSocket.send(
+          roomWebSocket.send(
             JSON.stringify({
               story_id: activeStory.id,
               action: 'reveal',
             }),
           )
         } else {
-          revealSocket.send(
+          roomWebSocket.send(
             JSON.stringify({
               story_id: activeStory.id,
               action: 'unreveal',
@@ -427,12 +407,12 @@ const Room: React.FC = () => {
         }
       }
     } else {
-      console.warn('Reveal WebSocket not ready yet')
+      console.warn('WebSocket not ready yet')
     }
   }
 
   const handleResetVotes = async () => {
-    if (revealSocket?.readyState === WebSocket.OPEN) {
+    if (roomWebSocket?.readyState === WebSocket.OPEN) {
       if (activeStory?.id != null) {
         await api
           .delete(`/votes/${activeStory?.id}/delete/`)
@@ -448,7 +428,7 @@ const Room: React.FC = () => {
             )
           })
 
-        revealSocket?.send(
+        roomWebSocket?.send(
           JSON.stringify({
             story_id: activeStory?.id,
             action: 'reset',
@@ -560,25 +540,30 @@ const Room: React.FC = () => {
         <div className="flex items-center justify-center">
           <div className="mt-6">
             <ul className="flex flex-wrap gap-4">
-              {participantsVoted.map((participant) => (
+              {participantsVoted.map((participantVoted) => (
                 <li
-                  key={participant.id}
+                  key={participantVoted.id}
                   className="flex flex-col items-center justify-center text-center"
                 >
-                  <div className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-white/30 bg-black shadow-[inset_0_1px_4px_rgba(255,255,255,0.5),_0_0_8px_rgba(255,255,255,0.2)]">
-                    {/* Metallic highlight with harder gradient stops */}
-                    <div className="pointer-events-none absolute top-0 left-0 h-full w-full rounded-2xl bg-gradient-to-br from-white/50 via-white/10 to-transparent mix-blend-screen" />
-                    <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-zinc-600">
-                      {/* Add voting state */}
-                      {participant.vote != null ? (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-800 text-3xl font-bold text-white">
-                          {revealVotes ? participant.vote : null}
-                        </div>
-                      ) : null}
+                  <div className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-b-2 border-neutral-700 bg-gradient-to-br from-neutral-900 to-black shadow-lg">
+                    {/* Gloss layer */}
+                    <div className="absolute inset-0">
+                      {/* Curved glossy highlight */}
+                      <div className="absolute top-0 left-0 h-2/3 w-full rounded-b-full bg-white/18 blur-sm" />
+                      {/* Bottom subtle glow */}
+                      <div className="absolute right-2 bottom-2 h-12 w-12 rounded-full bg-white/8 blur-xl" />
                     </div>
+                    {/* Add voting state */}
+                    {participantVoted.vote != null ? (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-800 text-3xl font-bold text-white">
+                        {revealVotes ? participantVoted.vote : null}
+                      </div>
+                    ) : (
+                      <div className="h-14 w-14 rounded-3xl bg-zinc-700" />
+                    )}
                   </div>
                   <span className="mt-2 text-lg text-white">
-                    {participant.profile.nickname}
+                    {participantVoted.profile.nickname}
                   </span>
                 </li>
               ))}

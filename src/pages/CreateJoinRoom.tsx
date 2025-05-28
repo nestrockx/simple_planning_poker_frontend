@@ -34,37 +34,17 @@ const CreateJoinRoom: React.FC = () => {
     }
 
     try {
-      const response = await api.post('/rooms/', payload, {
-        headers: {
-          Authorization: `Token ${localStorage.getItem('accessToken')}`,
-        },
-      })
+      const response = await api.post('/rooms/', payload)
       if (response.status !== 201) {
         setCreateError('Failed to create room')
         return
       }
 
-      await api.post(
-        '/stories/',
-        { room_id: response.data.id },
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem('accessToken')}`,
-          },
-        },
-      )
+      await api.post('/stories/', { room_id: response.data.id })
 
       const roomCode = response.data.code
 
-      await api.post(
-        `/rooms/${roomCode}/join/`,
-        {},
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem('accessToken')}`,
-          },
-        },
-      )
+      await api.post(`/rooms/${roomCode}/join/`, {})
 
       navigate(`/room/${roomCode}`)
     } catch (error) {
@@ -90,16 +70,7 @@ const CreateJoinRoom: React.FC = () => {
     setJoinError('')
 
     try {
-      console.log(localStorage.getItem('accessToken'))
-      const response = await api.post(
-        `/rooms/${joinRoomCode}/join/`,
-        {},
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem('accessToken')}`,
-          },
-        },
-      )
+      const response = await api.post(`/rooms/${joinRoomCode}/join/`, {})
       if (response.status !== 200) {
         setJoinError("Room doesn't exist")
         return

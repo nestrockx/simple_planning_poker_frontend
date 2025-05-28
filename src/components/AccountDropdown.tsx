@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { FaUser } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/api'
+import request from '../api/request'
 
 const AccountDropdown: React.FC = () => {
   const navigate = useNavigate()
@@ -9,15 +10,21 @@ const AccountDropdown: React.FC = () => {
   // const [nickname, setNickname] = React.useState<string | null>(null);
 
   useEffect(() => {
-    fetchUserData()
+    setUsername(localStorage.getItem('username'))
+    if (!localStorage.getItem('username')) {
+      fetchUserData()
+    }
   }, [])
 
   const fetchUserData = async () => {
+    console.log('Fetching user data...')
     api
       .get('/userinfo/')
       .then((response) => {
         console.log('User data:', response.data)
         setUsername(response.data.username)
+        localStorage.setItem('username', response.data.username)
+        localStorage.setItem('nickname', response.data.profile.nickname)
         // setNickname(response.data.profile.nickname);
       })
       .catch((error) => {
@@ -25,10 +32,11 @@ const AccountDropdown: React.FC = () => {
       })
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    sessionStorage.removeItem('activeStory')
+  const handleLogout = async () => {
     console.log('Logging out...')
+    localStorage.clear()
+    sessionStorage.clear()
+    await request.post('/auth/logout/')
     navigate('/login')
   }
 
@@ -48,7 +56,7 @@ const AccountDropdown: React.FC = () => {
 
       {
         <div className="absolute top-11.5 right-4 z-10 hidden w-40 flex-col space-y-3 rounded-lg bg-[rgba(20,20,20,0.8)] p-4 text-white shadow-md backdrop-blur-md group-hover:flex">
-          {localStorage.getItem('accessToken') ? (
+          {localStorage.getItem('username') ? (
             <>
               <div className="border-b pb-2 font-semibold">
                 Welcome {username}

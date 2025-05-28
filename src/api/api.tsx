@@ -1,15 +1,8 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-})
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken')
-  if (token) {
-    config.headers['Authorization'] = `Token ${token}`
-  }
-  return config
+  baseURL: 'https://simple-planning-poker-backend.onrender.com/api',
+  withCredentials: true,
 })
 
 api.interceptors.response.use(

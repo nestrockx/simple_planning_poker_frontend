@@ -3,6 +3,7 @@ import api from '../api/api'
 import ReturnHome from '../components/ReturnHome'
 import AccountDropdown from '../components/AccountDropdown'
 import { useNavigate } from 'react-router-dom'
+import request from '../api/request'
 
 const Account: React.FC = () => {
   const [username, setUsername] = React.useState<string | null>(null)
@@ -10,23 +11,27 @@ const Account: React.FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    fetchUserData()
+    setUsername(localStorage.getItem('username'))
+    setNickname(localStorage.getItem('nickname'))
+    if (
+      !localStorage.getItem('username') ||
+      !localStorage.getItem('nickname')
+    ) {
+      fetchUserData()
+    }
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    sessionStorage.removeItem('activeStory')
+  const handleLogout = async () => {
     console.log('Logging out...')
+    localStorage.clear()
+    sessionStorage.clear()
+    await request.post('/auth/logout/')
     navigate('/login')
   }
 
   const fetchUserData = async () => {
     api
-      .get('/userinfo/', {
-        headers: {
-          Authorization: `Token ${localStorage.getItem('accessToken')}`,
-        },
-      })
+      .get('/userinfo/')
       .then((response) => {
         console.log('User data:', response.data)
         setUsername(response.data.username)

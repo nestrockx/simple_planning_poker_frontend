@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiInfo } from 'react-icons/fi'
 import AccountDropdown from '../components/AccountDropdown'
-import auth from '../api/auth'
+import ReturnHome from '../components/ReturnHome'
+import request from '../api/request'
 
 const Auth: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
@@ -19,21 +20,18 @@ const Auth: React.FC = () => {
     try {
       const response =
         activeTab === 'login'
-          ? await auth.post('/login/', {
+          ? await request.post('/auth/login/', {
               username,
               password,
             })
-          : await auth.post('/register/', {
+          : await request.post('/auth/register/', {
               username,
               nickname,
               password,
             })
-
-      console.log(JSON.stringify(response.data, null, 2))
+      console.log('Auth response:', response.data)
 
       if (activeTab === 'login') {
-        const { token } = response.data
-        localStorage.setItem('accessToken', token)
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
         console.log('loginRedirect:', loginRedirect)
         if (loginRedirect != null) {
@@ -42,7 +40,13 @@ const Auth: React.FC = () => {
           navigate('/start/')
         }
       } else {
-        setActiveTab('login')
+        const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
+        console.log('loginRedirect:', loginRedirect)
+        if (loginRedirect != null) {
+          navigate(loginRedirect)
+        } else {
+          navigate('/start/')
+        }
       }
     } catch (err) {
       console.error(err)
@@ -61,6 +65,7 @@ const Auth: React.FC = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <AccountDropdown />
+      <ReturnHome />
 
       <div className="w-full max-w-sm rounded-xl bg-zinc-950 p-6 shadow-lg">
         {/* Tab buttons with animated indicator */}

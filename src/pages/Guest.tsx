@@ -1,6 +1,8 @@
 import React from 'react'
 import { FiInfo } from 'react-icons/fi'
-import auth from '../api/auth'
+import AccountDropdown from '../components/AccountDropdown'
+import ReturnHome from '../components/ReturnHome'
+import request from '../api/request'
 
 const Guest: React.FC = () => {
   const [error, setError] = React.useState('')
@@ -9,14 +11,12 @@ const Guest: React.FC = () => {
     e.preventDefault()
     setError('')
 
-    auth
-      .post('/guestlogin/', {
+    request
+      .post('/auth/guestlogin/', {
         nickname,
       })
       .then((response) => {
         console.log('Guest login response:', response.data)
-        const { token } = response.data
-        localStorage.setItem('accessToken', token)
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
         console.log('loginRedirect:', loginRedirect)
         if (loginRedirect != null) {
@@ -33,6 +33,9 @@ const Guest: React.FC = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
+      <AccountDropdown />
+      <ReturnHome />
+
       <div className="w-full max-w-sm rounded-xl bg-zinc-950 p-6 shadow-lg">
         {/* Auth Form */}
         <form onSubmit={handleAuth}>
