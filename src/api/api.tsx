@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://simple-planning-poker-backend.onrender.com/api',
+  baseURL: '/api/api',
   withCredentials: true,
 })
 
