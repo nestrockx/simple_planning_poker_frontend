@@ -30,14 +30,31 @@ const Room: React.FC = () => {
   const [roomName, setRoomName] = useState('')
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [userVoteValue, setUserVoteValue] = useState<number | null>(null)
+  const [userVoteValue, setUserVoteValue] = useState<number | string | null>(
+    null,
+  )
 
   const [revealVotes, setRevealVotes] = useState(false)
   const [hasAnyVotes, setHasAnyVotes] = useState(false)
 
   const [roomWebSocket, setRoomWebSocket] = useState<WebSocket | null>(null)
 
+  const [voteType, setVoteType] = useState<string>('default')
+
   const storiesRef = useRef<Story[]>([])
+
+  const getVoteOptions = () => {
+    switch (voteType) {
+      case 'fibonacci':
+        return [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+      case 'tshirts':
+        return ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+      case 'powers':
+        return [1, 2, 4, 8, 16, 32, 64]
+      default: // "default"
+        return Array.from({ length: 20 }, (_, i) => i + 1)
+    }
+  }
 
   useEffect(() => {
     storiesRef.current = stories
@@ -212,6 +229,8 @@ const Room: React.FC = () => {
           a.profile.nickname.localeCompare(b.profile.nickname),
         ),
       )
+      console.log('VOTE_TYPE', roomResponse.data.type)
+      setVoteType(roomResponse.data.type)
 
       api.get(`/stories/${roomResponse.data.id}`).then((storiesResponse) => {
         console.log('Stories:', storiesResponse.data)
@@ -439,7 +458,7 @@ const Room: React.FC = () => {
     //setTimeout(() => handleRevealVotes(false), 100)
   }
 
-  const handleSetUserVoteValue = (value: number) => {
+  const handleSetUserVoteValue = (value: number | string) => {
     sessionStorage.setItem('localUserVoteValue', value.toString())
     setUserVoteValue(value)
   }
@@ -609,17 +628,17 @@ const Room: React.FC = () => {
             <h3 className="mb-4 text-lg font-semibold">Select your vote</h3>
 
             <div className="mb-4 grid grid-cols-5 gap-2">
-              {Array.from({ length: 20 }, (_, i) => i + 1).map((number) => (
+              {getVoteOptions().map((option) => (
                 <button
-                  key={number}
-                  onClick={() => handleSetUserVoteValue(number)}
+                  key={option}
+                  onClick={() => handleSetUserVoteValue(option)}
                   className={`rounded-md py-2 text-center ${
-                    userVoteValue === number
+                    userVoteValue === option
                       ? 'bg-emerald-600'
                       : 'bg-zinc-700 hover:bg-zinc-600'
                   }`}
                 >
-                  {number}
+                  {option}
                 </button>
               ))}
             </div>
