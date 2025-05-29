@@ -202,6 +202,7 @@ const Room: React.FC = () => {
 
       setVoteType(roomResponse.data.type)
 
+      console.log('Stories: ' + roomResponse.data.id)
       axios
         .get(`/api/api/stories/${roomResponse.data.id}`)
         .then((storiesResponse) => {
