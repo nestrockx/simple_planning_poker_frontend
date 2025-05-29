@@ -6,7 +6,9 @@ import ReturnHome from '../components/ReturnHome'
 
 const CreateJoinRoom: React.FC = () => {
   const [roomName, setRoomName] = useState('')
-  const [type, setDeckType] = useState<'default' | 'fibonacci'>('default')
+  const [deckType, setDeckType] = useState<
+    'default' | 'fibonacci' | 'tshirts' | 'powers'
+  >('default')
   const [createError, setCreateError] = useState('')
 
   const [joinRoomCode, setJoinRoomCode] = useState('')
@@ -28,13 +30,13 @@ const CreateJoinRoom: React.FC = () => {
 
     setCreateError('')
 
-    const payload = {
+    const roomPayload = {
       name: roomName,
-      type: type,
+      type: deckType,
     }
 
     try {
-      const response = await api.post('/rooms/', payload)
+      const response = await api.post('/rooms/', roomPayload)
       if (response.status !== 201) {
         setCreateError('Failed to create room')
         return
@@ -121,7 +123,7 @@ const CreateJoinRoom: React.FC = () => {
                 type="radio"
                 name="deckType"
                 value="default"
-                checked={type === 'default'}
+                checked={deckType === 'default'}
                 onChange={() => setDeckType('default')}
               />
               Default 1, 2, 3, 4, 5, 6...
@@ -131,10 +133,32 @@ const CreateJoinRoom: React.FC = () => {
                 type="radio"
                 name="deckType"
                 value="fibonacci"
-                checked={type === 'fibonacci'}
+                checked={deckType === 'fibonacci'}
                 onChange={() => setDeckType('fibonacci')}
               />
               Fibonacci 1, 2, 3, 5, 8...
+            </label>
+          </div>
+          <div className="mt-3 flex gap-4">
+            <label className="flex items-center gap-2 text-white">
+              <input
+                type="radio"
+                name="deckType"
+                value="tshirts"
+                checked={deckType === 'tshirts'}
+                onChange={() => setDeckType('tshirts')}
+              />
+              T-shirts XS, S, M, L, XL...
+            </label>
+            <label className="flex items-center gap-2 text-white">
+              <input
+                type="radio"
+                name="deckType"
+                value="powers"
+                checked={deckType === 'powers'}
+                onChange={() => setDeckType('powers')}
+              />
+              Power of 2 0, 1, 2, 4, 8...
             </label>
           </div>
         </div>
