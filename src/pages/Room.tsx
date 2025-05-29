@@ -202,7 +202,7 @@ const Room: React.FC = () => {
       setVoteType(roomResponse.data.type)
 
       console.log('Stories: ' + roomResponse.data.id)
-      api.get(`//stories/${roomResponse.data.id}`).then((storiesResponse) => {
+      api.get(`/stories/${roomResponse.data.id}/`).then((storiesResponse) => {
         console.log('storiesResponse.data: ', storiesResponse.data)
         setStories(
           storiesResponse.data.map((story: { id: number; title: string }) => ({
