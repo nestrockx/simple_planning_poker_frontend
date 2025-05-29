@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { FiInfo } from 'react-icons/fi'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
-import request from '../api/request'
 
 const Auth: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
@@ -18,18 +17,6 @@ const Auth: React.FC = () => {
     setError('')
 
     try {
-      const response =
-        activeTab === 'login'
-          ? await request.post('/auth/login/', {
-              username,
-              password,
-            })
-          : await request.post('/auth/register/', {
-              username,
-              nickname,
-              password,
-            })
-
       if (activeTab === 'login') {
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
 

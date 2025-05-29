@@ -304,7 +304,7 @@ const Room: React.FC = () => {
       prevStories.filter((story) => story.id !== storyId),
     )
 
-    await api.delete(`/stories/${storyId}/delete/`).then((response) => {})
+    await api.delete(`/stories/${storyId}/delete/`).then(() => {})
     roomWebSocket?.send(
       JSON.stringify({
         action: 'remove_story',
@@ -338,7 +338,7 @@ const Room: React.FC = () => {
     setIsDialogOpen(false)
     api
       .post(`/votes/`, { story_id: activeStory?.id, value: userVoteValue })
-      .then((response) => {
+      .then(() => {
         if (roomWebSocket?.readyState === WebSocket.OPEN) {
           if (activeStory?.id != null) {
             roomWebSocket.send(
@@ -385,18 +385,16 @@ const Room: React.FC = () => {
   const handleResetVotes = async () => {
     if (roomWebSocket?.readyState === WebSocket.OPEN) {
       if (activeStory?.id != null) {
-        await api
-          .delete(`/votes/${activeStory?.id}/delete/`)
-          .then((response) => {
-            setParticipants((prevParticipants) =>
-              sortParticipantsByNickname(
-                prevParticipants.map((participant) => ({
-                  ...participant,
-                  vote: null,
-                })),
-              ),
-            )
-          })
+        await api.delete(`/votes/${activeStory?.id}/delete/`).then(() => {
+          setParticipants((prevParticipants) =>
+            sortParticipantsByNickname(
+              prevParticipants.map((participant) => ({
+                ...participant,
+                vote: null,
+              })),
+            ),
+          )
+        })
 
         roomWebSocket?.send(
           JSON.stringify({

@@ -15,7 +15,7 @@ const Guest: React.FC = () => {
       .post('/auth/guestlogin/', {
         nickname,
       })
-      .then((response) => {
+      .then(() => {
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
 
         if (loginRedirect != null) {
