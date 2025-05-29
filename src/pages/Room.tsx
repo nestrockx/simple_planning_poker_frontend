@@ -201,25 +201,29 @@ const Room: React.FC = () => {
 
       setVoteType(roomResponse.data.type)
 
-      api.get(`/stories/${roomResponse.data.id}`).then((storiesResponse) => {
-        setStories(
-          storiesResponse.data.map((story: { id: number; title: string }) => ({
-            id: story.id,
-            title: story.title,
-          })),
-        )
+      api
+        .get(`/api/stories/${roomResponse.data.id}`)
+        .then((storiesResponse) => {
+          setStories(
+            storiesResponse.data.map(
+              (story: { id: number; title: string }) => ({
+                id: story.id,
+                title: story.title,
+              }),
+            ),
+          )
 
-        if (sessionStorage.getItem('activeRoomCode') === roomCode) {
-          const activeStory = sessionStorage.getItem('activeStory')
-          if (activeStory === null) {
-            handleSetActiveStory(storiesResponse.data[0])
+          if (sessionStorage.getItem('activeRoomCode') === roomCode) {
+            const activeStory = sessionStorage.getItem('activeStory')
+            if (activeStory === null) {
+              handleSetActiveStory(storiesResponse.data[0])
+            } else {
+              handleSetActiveStory(JSON.parse(activeStory))
+            }
           } else {
-            handleSetActiveStory(JSON.parse(activeStory))
+            handleSetActiveStory(storiesResponse.data[0])
           }
-        } else {
-          handleSetActiveStory(storiesResponse.data[0])
-        }
-      })
+        })
     })
   }
 
