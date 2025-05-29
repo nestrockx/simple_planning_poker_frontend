@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import api from '../api/api'
 import { useParams } from 'react-router-dom'
 import { X } from 'lucide-react'
 import AccountDropdown from '../components/AccountDropdown'
@@ -9,6 +8,7 @@ import { Participant } from '../models/Participant'
 import { ParticipantVoted } from '../models/ParticipantVoted'
 import { ApiVote } from '../models/ApiVote'
 import { WebSocketVote } from '../models/WebSocketVote'
+import api from '../api/api'
 
 const Room: React.FC = () => {
   const { roomCode } = useParams<{ roomCode: string }>()
