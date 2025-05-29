@@ -93,7 +93,7 @@ const Room: React.FC = () => {
     if (!roomCode) return
 
     const ws = new WebSocket(
-      `wss://simple-planning-poker-backend.onrender.com/ws/reveal/${roomCode}/`,
+      `wss://${window.location.host}/ws/reveal/${roomCode}/`,
     )
 
     ws.onopen = () => {}
