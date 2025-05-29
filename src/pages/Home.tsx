@@ -13,7 +13,6 @@ const Home: React.FC = () => {
   }
 
   const handleHover = () => {
-    console.log('hovered')
     if (soundRef.current) {
       soundRef.current.play()
     }

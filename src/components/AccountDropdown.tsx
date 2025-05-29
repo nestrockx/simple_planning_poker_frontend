@@ -17,11 +17,9 @@ const AccountDropdown: React.FC = () => {
   }, [])
 
   const fetchUserData = async () => {
-    console.log('Fetching user data...')
     api
       .get('/userinfo/')
       .then((response) => {
-        console.log('User data:', response.data)
         setUsername(response.data.username)
         localStorage.setItem('username', response.data.username)
         localStorage.setItem('nickname', response.data.profile.nickname)
@@ -33,7 +31,6 @@ const AccountDropdown: React.FC = () => {
   }
 
   const handleLogout = async () => {
-    console.log('Logging out...')
     localStorage.clear()
     sessionStorage.clear()
     await request.post('/auth/logout/')

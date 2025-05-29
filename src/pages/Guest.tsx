@@ -16,9 +16,8 @@ const Guest: React.FC = () => {
         nickname,
       })
       .then((response) => {
-        console.log('Guest login response:', response.data)
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
-        console.log('loginRedirect:', loginRedirect)
+
         if (loginRedirect != null) {
           window.location.href = loginRedirect
         } else {

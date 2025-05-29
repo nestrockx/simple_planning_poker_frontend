@@ -29,11 +29,10 @@ const Auth: React.FC = () => {
               nickname,
               password,
             })
-      console.log('Auth response:', response.data)
 
       if (activeTab === 'login') {
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
-        console.log('loginRedirect:', loginRedirect)
+
         if (loginRedirect != null) {
           navigate(loginRedirect)
         } else {
@@ -41,7 +40,7 @@ const Auth: React.FC = () => {
         }
       } else {
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
-        console.log('loginRedirect:', loginRedirect)
+
         if (loginRedirect != null) {
           navigate(loginRedirect)
         } else {

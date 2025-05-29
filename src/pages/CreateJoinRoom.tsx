@@ -50,7 +50,6 @@ const CreateJoinRoom: React.FC = () => {
 
       navigate(`/room/${roomCode}`)
     } catch (error) {
-      console.log(error)
       setCreateError('Failed to create room')
       return
     }
@@ -79,7 +78,6 @@ const CreateJoinRoom: React.FC = () => {
       }
       navigate(`/room/${joinRoomCode}`)
     } catch (error) {
-      console.log(error)
       setJoinError("Room doesn't exist")
       return
     }

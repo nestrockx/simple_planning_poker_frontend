@@ -22,7 +22,6 @@ const Account: React.FC = () => {
   }, [])
 
   const handleLogout = async () => {
-    console.log('Logging out...')
     localStorage.clear()
     sessionStorage.clear()
     await request.post('/auth/logout/')
@@ -33,7 +32,6 @@ const Account: React.FC = () => {
     api
       .get('/userinfo/')
       .then((response) => {
-        console.log('User data:', response.data)
         setUsername(response.data.username)
         setNickname(response.data.profile.nickname)
       })

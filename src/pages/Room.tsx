@@ -13,35 +13,28 @@ import { WebSocketVote } from '../models/WebSocketVote'
 const Room: React.FC = () => {
   const { roomCode } = useParams<{ roomCode: string }>()
 
+  const storiesRef = useRef<Story[]>([])
   const activeStoryRef = useRef<Story | null>(null)
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-
   const [stories, setStories] = useState<Story[]>([])
   const [newStory, setNewStory] = useState('')
   const [activeStory, setActiveStory] = useState<Story | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
-  const [participantsVoted, setParticipantsVoted] = useState<
-    ParticipantVoted[]
-  >([])
-
   const [error, setError] = useState('')
   const [roomId, setRoomId] = useState(null)
   const [roomName, setRoomName] = useState('')
-
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [revealVotes, setRevealVotes] = useState(false)
+  const [hasAnyVotes, setHasAnyVotes] = useState(false)
+  const [roomWebSocket, setRoomWebSocket] = useState<WebSocket | null>(null)
+  const [voteType, setVoteType] = useState<string>('default')
+  const [participantsVoted, setParticipantsVoted] = useState<
+    ParticipantVoted[]
+  >([])
   const [userVoteValue, setUserVoteValue] = useState<number | string | null>(
     null,
   )
-
-  const [revealVotes, setRevealVotes] = useState(false)
-  const [hasAnyVotes, setHasAnyVotes] = useState(false)
-
-  const [roomWebSocket, setRoomWebSocket] = useState<WebSocket | null>(null)
-
-  const [voteType, setVoteType] = useState<string>('default')
-
-  const storiesRef = useRef<Story[]>([])
 
   const getVoteOptions = () => {
     switch (voteType) {
@@ -70,7 +63,6 @@ const Room: React.FC = () => {
 
     if (activeStory?.id != null) {
       api.get(`/votes/${activeStory.id}/`).then((response) => {
-        console.log('Votes:', response.data)
         setParticipantsVoted((prevParticipants) =>
           prevParticipants.map((participant) => {
             const vote = response.data.find(
@@ -85,8 +77,6 @@ const Room: React.FC = () => {
 
         setHasAnyVotes(response.data.length > 0)
       })
-
-      console.log('Participants voted:', participantsVoted)
     }
   }, [participants])
 
@@ -106,27 +96,21 @@ const Room: React.FC = () => {
       `wss://simple-planning-poker-backend.onrender.com/ws/reveal/${roomCode}/`,
     )
 
-    ws.onopen = () => {
-      console.log('Reveal WebSocket connected')
-    }
+    ws.onopen = () => {}
 
     ws.onmessage = (event) => {
-      console.log('Reveal WebSocket message received:', event.data)
       const data = JSON.parse(event.data)
 
       if (data.type === 'reveal_votes') {
-        console.log('Reveal data:', data)
         if (activeStoryRef.current?.id !== data.reveal.story_id) {
-          console.log('Active story ID does not match')
           return
         }
         setRevealVotes(data.reveal.value)
       } else if (data.type === 'reset_votes') {
         if (activeStoryRef.current?.id !== data.reset.story_id) {
-          console.log('Active story ID does not match')
           return
         }
-        console.log('Reset data:', data)
+
         setParticipants((prevParticipants) =>
           sortParticipantsByNickname(
             prevParticipants.map((participant) => ({
@@ -138,14 +122,12 @@ const Room: React.FC = () => {
         setRevealVotes(false)
       } else if (data.type === 'vote_update') {
         if (activeStoryRef.current?.id !== data.vote.story_id) {
-          console.log('Active story ID does not match')
           return
         }
-        console.log('Vote update received:', data)
+
         handleVoteUpdate(data.vote)
       } else if (data.type === 'participant_add') {
         api.get(`/userinfo/${data.participants.id}/`).then((response) => {
-          console.log('Participant data:', response.data)
           const newParticipant: Participant = {
             id: response.data.id,
             username: response.data.username,
@@ -159,10 +141,8 @@ const Room: React.FC = () => {
               (p) => p.id === newParticipant.id,
             )
             if (existingParticipant) {
-              console.log('Participant already exists:', existingParticipant)
               return prevParticipants
             } else {
-              console.log('New participant added:', newParticipant)
               return [...prevParticipants, newParticipant].sort((a, b) =>
                 a.profile.nickname.localeCompare(b.profile.nickname),
               )
@@ -174,11 +154,10 @@ const Room: React.FC = () => {
           const updatedParticipants = prevParticipants.filter(
             (p) => p.id !== data.participants.id,
           )
-          console.log('Participant removed:', data.participants)
+
           return updatedParticipants
         })
       } else if (data.type === 'add_story') {
-        console.log('Add story data:', data)
         const newStory: Story = {
           id: data.story.id,
           title: data.story.title,
@@ -187,7 +166,6 @@ const Room: React.FC = () => {
         setStories((prevStories) => [...prevStories, newStory])
         // handleSetActiveStory(newStory)
       } else if (data.type === 'remove_story') {
-        console.log('Remove story data:', data)
         setStories((prevStories) =>
           prevStories.filter((story) => story.id !== data.story.id),
         )
@@ -195,22 +173,14 @@ const Room: React.FC = () => {
           activeStoryRef.current?.id === data.story.id &&
           activeStoryRef.current?.id !== storiesRef.current[0].id
         ) {
-          console.log('Active story removed, setting to first story')
           handleSetActiveStory(storiesRef.current[0])
         } else if (activeStoryRef.current?.id === data.story.id) {
-          console.log('Active story removed, setting to second story')
           handleSetActiveStory(storiesRef.current[1])
-        } else {
-          console.log('Active story not removed', activeStoryRef.current?.id)
-          console.log('  :', storiesRef.current[0].id)
-          console.log('  :', storiesRef.current[1].id)
         }
       }
     }
 
-    ws.onclose = () => {
-      console.log('Reveal WebSocket disconnected')
-    }
+    ws.onclose = () => {}
 
     setRoomWebSocket(ws)
 
@@ -221,7 +191,6 @@ const Room: React.FC = () => {
 
   const fetchRoomData = async () => {
     api.get(`/rooms/${roomCode}/`).then((roomResponse) => {
-      console.log('Room data:', roomResponse.data)
       setRoomId(roomResponse.data.id)
       setRoomName(roomResponse.data.name)
       setParticipants(
@@ -229,11 +198,10 @@ const Room: React.FC = () => {
           a.profile.nickname.localeCompare(b.profile.nickname),
         ),
       )
-      console.log('VOTE_TYPE', roomResponse.data.type)
+
       setVoteType(roomResponse.data.type)
 
       api.get(`/stories/${roomResponse.data.id}`).then((storiesResponse) => {
-        console.log('Stories:', storiesResponse.data)
         setStories(
           storiesResponse.data.map((story: { id: number; title: string }) => ({
             id: story.id,
@@ -244,14 +212,11 @@ const Room: React.FC = () => {
         if (sessionStorage.getItem('activeRoomCode') === roomCode) {
           const activeStory = sessionStorage.getItem('activeStory')
           if (activeStory === null) {
-            console.log('No active story found in sessionStorage')
             handleSetActiveStory(storiesResponse.data[0])
           } else {
-            console.log('Active story found in sessionStorage:', activeStory)
             handleSetActiveStory(JSON.parse(activeStory))
           }
         } else {
-          console.log('No active room found in sessionStorage')
           handleSetActiveStory(storiesResponse.data[0])
         }
       })
@@ -267,10 +232,8 @@ const Room: React.FC = () => {
     setRevealVotes(false)
     setActiveStory(story)
     sessionStorage.setItem('activeStory', JSON.stringify(story))
-    console.log(`Active story: ${story.id} ${story.title}`)
 
     await api.get(`/votes/${story.id}/`).then((response) => {
-      console.log('Votes:', response.data)
       setParticipants((prevParticipants) =>
         sortParticipantsByNickname(
           prevParticipants.map((participant) => {
@@ -286,7 +249,6 @@ const Room: React.FC = () => {
       )
     })
     api.get(`/stories/${story.id}/getstory`).then((response) => {
-      console.log('Story details:', response.data)
       setRevealVotes(response.data.is_revealed)
     })
 
@@ -315,7 +277,7 @@ const Room: React.FC = () => {
       is_revealed: response.data.is_revealed,
     }
     // setStories((prevStories) => [...prevStories, newStoryItem])
-    console.log('Sending new story to WebSocket:', newStoryItem)
+
     roomWebSocket?.send(
       JSON.stringify({
         action: 'add_story',
@@ -331,7 +293,7 @@ const Room: React.FC = () => {
 
   const handleDeleteStory = async (storyId: number) => {
     const title = activeStory?.title
-    console.log('Active story:', activeStory?.id)
+
     if (activeStory?.id === storyId && activeStory?.id !== stories[0].id) {
       handleSetActiveStory(stories[0])
     } else if (activeStory?.id === storyId) {
@@ -342,9 +304,7 @@ const Room: React.FC = () => {
       prevStories.filter((story) => story.id !== storyId),
     )
 
-    await api.delete(`/stories/${storyId}/delete/`).then((response) => {
-      console.log('Delete story:', response.data)
-    })
+    await api.delete(`/stories/${storyId}/delete/`).then((response) => {})
     roomWebSocket?.send(
       JSON.stringify({
         action: 'remove_story',
@@ -355,22 +315,16 @@ const Room: React.FC = () => {
   }
 
   const handleVote = () => {
-    console.log('Voting dialog opening')
     setIsDialogOpen(true)
   }
 
   const handleVoteUpdate = (data: WebSocketVote) => {
-    console.log('Vote update received:', data)
-    console.log('Data story ID:', data.story_id)
-    console.log('Active story ID:', activeStoryRef.current?.id)
-
     const currentActiveStory = activeStoryRef.current
     if (data.story_id === currentActiveStory?.id) {
       setParticipants((prevParticipants) =>
         sortParticipantsByNickname(
           prevParticipants.map((participant) => {
             if (participant.username === data.username) {
-              console.log('User vote found:', data.value)
               return { ...participant, vote: data.value }
             }
             return participant
@@ -381,12 +335,10 @@ const Room: React.FC = () => {
   }
 
   const handleConfirmVote = async () => {
-    console.log('User voted:', userVoteValue)
     setIsDialogOpen(false)
     api
       .post(`/votes/`, { story_id: activeStory?.id, value: userVoteValue })
       .then((response) => {
-        console.log('Vote submitted:', response.data)
         if (roomWebSocket?.readyState === WebSocket.OPEN) {
           if (activeStory?.id != null) {
             roomWebSocket.send(
@@ -436,7 +388,6 @@ const Room: React.FC = () => {
         await api
           .delete(`/votes/${activeStory?.id}/delete/`)
           .then((response) => {
-            console.log('Reset votes:', response.data)
             setParticipants((prevParticipants) =>
               sortParticipantsByNickname(
                 prevParticipants.map((participant) => ({

@@ -8,7 +8,6 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.log('API error:', error)
     if (error.response && error.response.status === 401) {
       if (
         window.location.pathname !== '/login/' &&
