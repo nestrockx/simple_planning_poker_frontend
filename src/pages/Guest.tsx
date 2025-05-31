@@ -48,7 +48,7 @@ const Guest: React.FC = () => {
             <label className="mb-1 flex items-center gap-1 text-white">
               Displayname
               <div className="group relative">
-                <FiInfo className="cursor-pointer text-blue-400" />
+                <FiInfo className="cursor-pointer text-emerald-400" />
                 <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 w-56 -translate-x-1/2 rounded bg-zinc-800 p-2 text-sm text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
                   This is how you will apear to others.
                 </div>
@@ -64,7 +64,7 @@ const Guest: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700"
+            className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
           >
             Continue
           </button>

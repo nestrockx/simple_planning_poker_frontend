@@ -13,15 +13,47 @@ const Auth: React.FC = () => {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  const getPasswordValidationStatus = (password: string) => {
+    return {
+      length: password.length >= 7,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    }
+  }
+  const isPasswordValid = (password: string) => {
+    const checks = getPasswordValidationStatus(password)
+    if (!checks.length) return false
+    if (!checks.uppercase) return false
+    if (!checks.lowercase) return false
+    if (!checks.number) return false
+    if (!checks.special) return false
+    return true
+  }
+
+  const passwordValidation = getPasswordValidationStatus(password)
+
   useEffect(() => {
     setError('')
+    setUsername('')
+    setPassword('')
+    setNickname('')
   }, [activeTab])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    if (password.length < 7) {
+    if (username.length < 4) {
+      setError('Username must be at least 4 characters long.')
+      return
+    }
+    if (activeTab === 'register' && !isPasswordValid(password)) {
+      setError('Inavlid password')
+      return
+    }
+    if (activeTab === 'login' && password.length < 7) {
       setError('Password must be at least 7 characters long.')
       return
     }
@@ -72,7 +104,7 @@ const Auth: React.FC = () => {
         {/* Tab buttons with animated indicator */}
         <div className="relative mb-6 flex overflow-hidden rounded bg-zinc-800">
           <div
-            className={`absolute top-0 left-0 h-full w-1/2 rounded bg-blue-600 transition-transform duration-300 ${
+            className={`absolute top-0 left-0 h-full w-1/2 rounded bg-emerald-700 transition-transform duration-300 ${
               activeTab === 'register' ? 'translate-x-full' : 'translate-x-0'
             }`}
             style={{ zIndex: 0 }}
@@ -102,13 +134,15 @@ const Auth: React.FC = () => {
             {activeTab}
           </h2>
 
-          {error && <div className="mb-2 text-red-500">{error}</div>}
+          {error && (
+            <div className="mb-2 text-rose-500 shadow-2xl">{error}</div>
+          )}
 
           <div className="mb-4">
             <label className="mb-1 flex items-center gap-1 text-white">
               Username
               <div className="group relative">
-                <FiInfo className="cursor-pointer text-blue-400" />
+                <FiInfo className="cursor-pointer text-emerald-400" />
                 <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 w-56 -translate-x-1/2 rounded bg-zinc-800 p-2 text-sm text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
                   Your <b>unique</b> name for login. Must be at least 3
                   characters.
@@ -129,7 +163,7 @@ const Auth: React.FC = () => {
               <label className="mb-1 flex items-center gap-1 text-white">
                 Displayname
                 <div className="group relative">
-                  <FiInfo className="cursor-pointer text-blue-400" />
+                  <FiInfo className="cursor-pointer text-emerald-400" />
                   <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 w-56 -translate-x-1/2 rounded bg-zinc-800 p-2 text-sm text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
                     This is how you will apear to others. You can change it
                     later.
@@ -157,20 +191,69 @@ const Auth: React.FC = () => {
             />
           </div>
 
+          {activeTab === 'register' && (
+            <ul className="mt-2 mb-4 space-y-1 text-sm text-white">
+              <li
+                className={
+                  passwordValidation.length ? 'text-green-400' : 'text-red-400'
+                }
+              >
+                {passwordValidation.length ? '✅' : '❌'} At least 7 characters
+              </li>
+              <li
+                className={
+                  passwordValidation.uppercase
+                    ? 'text-green-400'
+                    : 'text-red-400'
+                }
+              >
+                {passwordValidation.uppercase ? '✅' : '❌'} At least one
+                uppercase letter
+              </li>
+              <li
+                className={
+                  passwordValidation.lowercase
+                    ? 'text-green-400'
+                    : 'text-red-400'
+                }
+              >
+                {passwordValidation.lowercase ? '✅' : '❌'} At least one
+                lowercase letter
+              </li>
+              <li
+                className={
+                  passwordValidation.number ? 'text-green-400' : 'text-red-400'
+                }
+              >
+                {passwordValidation.number ? '✅' : '❌'} At least one number
+              </li>
+              <li
+                className={
+                  passwordValidation.special ? 'text-green-400' : 'text-red-400'
+                }
+              >
+                {passwordValidation.special ? '✅' : '❌'} At least one special
+                character
+              </li>
+            </ul>
+          )}
+
           <button
             type="submit"
-            className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700"
+            className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
           >
             {activeTab === 'login' ? 'Login' : 'Register'}
           </button>
         </form>
-        <button
-          type="button"
-          onClick={handleGuestLogin}
-          className="mt-4 block w-full text-center text-sm text-blue-400 hover:underline"
-        >
-          Continue as Guest
-        </button>
+        {activeTab === 'login' && (
+          <button
+            type="button"
+            onClick={handleGuestLogin}
+            className="mt-4 block w-full text-center text-emerald-400 hover:underline"
+          >
+            Continue as Guest
+          </button>
+        )}
       </div>
     </div>
   )

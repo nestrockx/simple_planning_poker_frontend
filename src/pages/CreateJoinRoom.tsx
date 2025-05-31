@@ -120,6 +120,7 @@ const CreateJoinRoom: React.FC = () => {
           <div className="flex gap-4">
             <label className="flex items-center gap-2 text-white">
               <input
+                className="accent-cyan-700"
                 type="radio"
                 name="deckType"
                 value="default"
@@ -130,6 +131,7 @@ const CreateJoinRoom: React.FC = () => {
             </label>
             <label className="flex items-center gap-2 text-white">
               <input
+                className="accent-cyan-700"
                 type="radio"
                 name="deckType"
                 value="fibonacci"
@@ -142,6 +144,7 @@ const CreateJoinRoom: React.FC = () => {
           <div className="mt-3 flex gap-4">
             <label className="flex items-center gap-2 text-white">
               <input
+                className="accent-cyan-700"
                 type="radio"
                 name="deckType"
                 value="tshirts"
@@ -152,6 +155,7 @@ const CreateJoinRoom: React.FC = () => {
             </label>
             <label className="flex items-center gap-2 text-white">
               <input
+                className="accent-cyan-700"
                 type="radio"
                 name="deckType"
                 value="powers"
@@ -165,7 +169,7 @@ const CreateJoinRoom: React.FC = () => {
 
         <button
           type="submit"
-          className="w-full rounded-md bg-blue-600 py-2 text-white transition hover:bg-blue-700"
+          className="w-full rounded-md bg-cyan-700 py-2 text-white transition hover:bg-cyan-800"
         >
           Create Room
         </button>
@@ -196,7 +200,7 @@ const CreateJoinRoom: React.FC = () => {
 
         <button
           type="submit"
-          className="w-full rounded-md bg-green-600 py-2 text-white transition hover:bg-green-700"
+          className="w-full rounded-md bg-emerald-700 py-2 text-white transition hover:bg-emerald-800"
         >
           Join Room
         </button>

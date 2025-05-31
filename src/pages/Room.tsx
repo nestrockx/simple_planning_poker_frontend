@@ -9,6 +9,7 @@ import { ParticipantVoted } from '../models/ParticipantVoted'
 import { ApiVote } from '../models/ApiVote'
 import { WebSocketVote } from '../models/WebSocketVote'
 import { IoIosLink } from 'react-icons/io'
+import { FaRegCopy } from 'react-icons/fa'
 import { IoCheckmarkCircle } from 'react-icons/io5'
 import api from '../api/api'
 
@@ -17,6 +18,8 @@ const Room: React.FC = () => {
 
   const storiesRef = useRef<Story[]>([])
   const activeStoryRef = useRef<Story | null>(null)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+  const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [stories, setStories] = useState<Story[]>([])
@@ -31,7 +34,8 @@ const Room: React.FC = () => {
   const [hasAnyVotes, setHasAnyVotes] = useState(false)
   const [roomWebSocket, setRoomWebSocket] = useState<WebSocket | null>(null)
   const [voteType, setVoteType] = useState<string>('default')
-  const [copied, setCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const [codeCopied, setCodeCopied] = useState(false)
   const [participantsVoted, setParticipantsVoted] = useState<
     ParticipantVoted[]
   >([])
@@ -51,6 +55,33 @@ const Room: React.FC = () => {
         return Array.from({ length: 20 }, (_, i) => i + 1)
     }
   }
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = sidebarRef.current
+      const hamburgerBtn = hamburgerButtonRef.current
+      const target = event.target as Node
+
+      if (
+        sidebar &&
+        !sidebar.contains(target) &&
+        hamburgerBtn &&
+        !hamburgerBtn.contains(target)
+      ) {
+        setIsSidebarOpen(false)
+      }
+    }
+
+    if (isSidebarOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isSidebarOpen])
 
   useEffect(() => {
     storiesRef.current = stories
@@ -425,8 +456,21 @@ const Room: React.FC = () => {
       .writeText(window.location.href)
       .then(() => {
         console.log('Room link copied')
-        setCopied(true)
-        setTimeout(() => setCopied(false), 1000) // Revert after 1s
+        setLinkCopied(true)
+        setTimeout(() => setLinkCopied(false), 1000) // Revert after 1s
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err)
+      })
+  }
+
+  const handleCopyRoomCode = () => {
+    navigator.clipboard
+      .writeText(window.location.href.split('/')[4])
+      .then(() => {
+        console.log('Room code copied')
+        setCodeCopied(true)
+        setTimeout(() => setCodeCopied(false), 1000) // Revert after 1s
       })
       .catch((err) => {
         console.error('Failed to copy: ', err)
@@ -442,6 +486,7 @@ const Room: React.FC = () => {
 
       {/* Sidebar */}
       <div
+        ref={sidebarRef}
         className={`absolute top-0 left-0 z-50 h-full w-70 transform bg-[rgba(24,24,24,0.6)] text-white shadow-lg backdrop-blur-md transition-transform duration-300 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
@@ -460,19 +505,30 @@ const Room: React.FC = () => {
                 }`}
               >
                 <span
-                  className="flex-1 truncate p-2"
+                  className="flex-1 truncate p-2 text-lg"
                   onClick={() => handleClickStory(story)}
                 >
                   {story.title}
                 </span>
                 {stories.length > 1 && (
-                  <button
-                    onClick={() => handleDeleteStory(story.id)}
-                    className="ml-3 p-2 text-white hover:text-zinc-700 active:text-zinc-950"
-                    title="Delete story"
-                  >
-                    <X />
-                  </button>
+                  <div className="flex gap-0">
+                    {activeStory?.id === story.id && (
+                      <button
+                        onClick={() => {}}
+                        className="my-1 rounded-xl px-2 py-1 text-sm duration-200 hover:bg-emerald-950"
+                        title="Gather all particpants to vote"
+                      >
+                        Summon
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDeleteStory(story.id)}
+                      className="ml-0 p-2 text-white hover:text-emerald-950 active:text-black"
+                      title="Delete story"
+                    >
+                      <X />
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -500,6 +556,7 @@ const Room: React.FC = () => {
 
       {/* Hamburger Button */}
       <button
+        ref={hamburgerButtonRef}
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="absolute top-7 left-6 z-50 flex h-[1.3rem] w-8 flex-col justify-between focus:outline-none"
       >
@@ -523,13 +580,33 @@ const Room: React.FC = () => {
       {/* Main Content */}
       <div className="mt-10 flex-1 p-6">
         <h2 className="text-lg text-white">
-          <p>
-            <span className="font-bold">Code:&nbsp;&nbsp;&nbsp;</span>
-            {roomCode}
-          </p>
+          <div className="flex gap-2">
+            <span className="font-bold">Code:&nbsp;</span> {roomCode}
+            <div className="group relative h-[20px] w-[20px]">
+              {/* Tooltip */}
+              <div className="pointer-events-none absolute top-8 left-1/2 z-50 -translate-x-1/2 rounded bg-zinc-700 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity duration-1000 group-hover:opacity-100">
+                Copy room code
+              </div>
+
+              {/* Copy Icon */}
+              <FaRegCopy
+                onClick={handleCopyRoomCode}
+                className={`absolute top-1 left-0 h-full w-full cursor-pointer transition-opacity duration-300 ${
+                  codeCopied ? 'pointer-events-none opacity-0' : 'opacity-100'
+                } text-cyan-200`}
+              />
+
+              {/* Checkmark Icon */}
+              <IoCheckmarkCircle
+                className={`absolute top-1 left-0 h-full w-full transition-opacity duration-300 ${
+                  codeCopied ? 'opacity-100' : 'pointer-events-none opacity-0'
+                } text-cyan-400`}
+              />
+            </div>
+          </div>
           <div className="flex gap-2">
             <span className="font-bold">Room:</span> {roomName}
-            <div className="group relative h-[25px] w-[25px]">
+            <div className="group relative h-[24px] w-[24px]">
               {/* Tooltip */}
               <div className="pointer-events-none absolute top-8 left-1/2 z-50 -translate-x-1/2 rounded bg-zinc-700 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity duration-1000 group-hover:opacity-100">
                 Copy room link
@@ -538,18 +615,16 @@ const Room: React.FC = () => {
               {/* Link Icon */}
               <IoIosLink
                 onClick={handleCopyRoomLink}
-                className={`absolute top-0.5 left-0 h-full w-full cursor-pointer transition-opacity duration-300 ${
-                  copied ? 'pointer-events-none opacity-0' : 'opacity-100'
-                } text-emerald-200`}
-                size={25}
+                className={`absolute top-1 left-0 h-full w-full cursor-pointer transition-opacity duration-300 ${
+                  linkCopied ? 'pointer-events-none opacity-0' : 'opacity-100'
+                } text-cyan-200`}
               />
 
               {/* Checkmark Icon */}
               <IoCheckmarkCircle
-                className={`absolute top-0.5 left-0 h-full w-full transition-opacity duration-300 ${
-                  copied ? 'opacity-100' : 'pointer-events-none opacity-0'
-                } text-emerald-400`}
-                size={25}
+                className={`absolute top-1 left-0 h-full w-full transition-opacity duration-300 ${
+                  linkCopied ? 'opacity-100' : 'pointer-events-none opacity-0'
+                } text-cyan-400`}
               />
             </div>
           </div>
@@ -592,7 +667,7 @@ const Room: React.FC = () => {
             {/* Reveal Votes Button under boxes */}
             <div className="mt-6 flex flex-col items-center space-y-3">
               <button
-                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:bg-zinc-600 disabled:opacity-50"
+                className="rounded-md bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800 disabled:bg-zinc-600 disabled:opacity-50"
                 onClick={() => handleRevealVotes(!revealVotes)}
                 disabled={!hasAnyVotes}
               >
@@ -616,7 +691,7 @@ const Room: React.FC = () => {
       <div className="absolute bottom-0 left-[calc(50%)] mb-6 -translate-x-1/2 transform">
         {!revealVotes && (
           <button
-            className="mb-8 rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
+            className="mb-8 rounded-md bg-cyan-800 px-4 py-2 text-white hover:bg-cyan-900"
             onClick={handleVote}
           >
             Vote
@@ -636,7 +711,7 @@ const Room: React.FC = () => {
                   onClick={() => handleSetUserVoteValue(option)}
                   className={`rounded-md py-2 text-center ${
                     userVoteValue === option
-                      ? 'bg-emerald-600'
+                      ? 'bg-cyan-700'
                       : 'bg-zinc-700 hover:bg-zinc-600'
                   }`}
                 >
@@ -653,7 +728,7 @@ const Room: React.FC = () => {
                 Cancel
               </button>
               <button
-                className="rounded bg-emerald-600 px-4 py-2 hover:bg-emerald-700 disabled:opacity-50"
+                className="rounded bg-cyan-700 px-4 py-2 hover:bg-cyan-800 disabled:opacity-50"
                 onClick={handleConfirmVote}
                 disabled={userVoteValue === null}
               >
