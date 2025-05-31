@@ -10,8 +10,11 @@ const AccountDropdown: React.FC = () => {
   // const [nickname, setNickname] = React.useState<string | null>(null);
 
   useEffect(() => {
-    setUsername(localStorage.getItem('username'))
-    if (!localStorage.getItem('username')) {
+    if (localStorage.getItem('username')) {
+      console.log('XD')
+      setUsername(localStorage.getItem('username'))
+    } else {
+      console.log('XD2')
       fetchUserData()
     }
   }, [])
@@ -47,40 +50,40 @@ const AccountDropdown: React.FC = () => {
 
   return (
     <div className="group">
-      <button className="absolute top-4.5 right-26 text-2xl font-bold text-white transition hover:text-zinc-500">
-        <FaUser size={28} />
+      {/* Icon Button */}
+      <button className="absolute top-4.5 right-26.5 text-white transition-colors hover:text-zinc-400">
+        <FaUser size={26} />
       </button>
 
-      {
-        <div className="absolute top-11.5 right-4 z-10 hidden w-40 flex-col space-y-3 rounded-lg bg-[rgba(20,20,20,0.8)] p-4 text-white shadow-md backdrop-blur-md group-hover:flex">
-          {localStorage.getItem('username') ? (
-            <>
-              <div className="border-b pb-2 font-semibold">
-                Welcome {username}
-              </div>
-              <button
-                onClick={handleAccountClick}
-                className="text-left hover:text-blue-600"
-              >
-                Account
-              </button>
-              <button
-                onClick={handleLogout}
-                className="text-left hover:text-red-600"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
+      {/* Dropdown Menu */}
+      <div className="absolute top-11 right-10 z-20 hidden w-46 flex-col rounded-xl bg-zinc-900/50 px-4 py-4 text-white shadow-lg backdrop-blur-md group-hover:flex">
+        {localStorage.getItem('username') ? (
+          <>
+            <div className="mb-2 border-b border-zinc-600 px-1 pb-2 font-bold text-zinc-300 capitalize">
+              {username}
+            </div>
             <button
-              onClick={handleLogin}
-              className="text-left hover:text-blue-600"
+              onClick={handleAccountClick}
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-emerald-400"
             >
-              Login
+              Account
             </button>
-          )}
-        </div>
-      }
+            <button
+              onClick={handleLogout}
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-rose-400"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={handleLogin}
+            className="w-full rounded-md px-2 py-1 text-left text-sm transition hover:bg-zinc-800 hover:text-blue-400"
+          >
+            Login
+          </button>
+        )}
+      </div>
     </div>
   )
 }

@@ -8,6 +8,8 @@ import { Participant } from '../models/Participant'
 import { ParticipantVoted } from '../models/ParticipantVoted'
 import { ApiVote } from '../models/ApiVote'
 import { WebSocketVote } from '../models/WebSocketVote'
+import { IoIosLink } from 'react-icons/io'
+import { IoCheckmarkCircle } from 'react-icons/io5'
 import api from '../api/api'
 
 const Room: React.FC = () => {
@@ -29,6 +31,7 @@ const Room: React.FC = () => {
   const [hasAnyVotes, setHasAnyVotes] = useState(false)
   const [roomWebSocket, setRoomWebSocket] = useState<WebSocket | null>(null)
   const [voteType, setVoteType] = useState<string>('default')
+  const [copied, setCopied] = useState(false)
   const [participantsVoted, setParticipantsVoted] = useState<
     ParticipantVoted[]
   >([])
@@ -164,7 +167,6 @@ const Room: React.FC = () => {
           is_revealed: data.story.is_revealed,
         }
         setStories((prevStories) => [...prevStories, newStory])
-        // handleSetActiveStory(newStory)
       } else if (data.type === 'remove_story') {
         setStories((prevStories) =>
           prevStories.filter((story) => story.id !== data.story.id),
@@ -173,9 +175,9 @@ const Room: React.FC = () => {
           activeStoryRef.current?.id === data.story.id &&
           activeStoryRef.current?.id !== storiesRef.current[0].id
         ) {
-          handleSetActiveStory(storiesRef.current[0])
+          handleSetActiveStory(storiesRef.current[0], false)
         } else if (activeStoryRef.current?.id === data.story.id) {
-          handleSetActiveStory(storiesRef.current[1])
+          handleSetActiveStory(storiesRef.current[1], false)
         }
       }
     }
@@ -214,12 +216,12 @@ const Room: React.FC = () => {
         if (sessionStorage.getItem('activeRoomCode') === roomCode) {
           const activeStory = sessionStorage.getItem('activeStory')
           if (activeStory === null) {
-            handleSetActiveStory(storiesResponse.data[0])
+            handleSetActiveStory(storiesResponse.data[0], false)
           } else {
-            handleSetActiveStory(JSON.parse(activeStory))
+            handleSetActiveStory(JSON.parse(activeStory), false)
           }
         } else {
-          handleSetActiveStory(storiesResponse.data[0])
+          handleSetActiveStory(storiesResponse.data[0], false)
         }
       })
     })
@@ -230,27 +232,29 @@ const Room: React.FC = () => {
       a.profile.nickname.localeCompare(b.profile.nickname),
     )
 
-  const handleSetActiveStory = async (story: Story) => {
+  const handleSetActiveStory = async (story: Story, change: boolean) => {
     setRevealVotes(false)
     setActiveStory(story)
     sessionStorage.setItem('activeStory', JSON.stringify(story))
 
-    await api.get(`/votes/${story.id}/`).then((response) => {
-      setParticipants((prevParticipants) =>
-        sortParticipantsByNickname(
-          prevParticipants.map((participant) => {
-            const vote = response.data.find(
-              (vote: ApiVote) => vote.user.username === participant.username,
-            )
-            return {
-              ...participant,
-              vote: vote ? vote.value : null,
-            }
-          }),
-        ),
-      )
-    })
-    api.get(`/stories/${story.id}/getstory`).then((response) => {
+    if (change) {
+      await api.get(`/votes/${story.id}/`).then((response) => {
+        setParticipants((prevParticipants) =>
+          sortParticipantsByNickname(
+            prevParticipants.map((participant) => {
+              const vote = response.data.find(
+                (vote: ApiVote) => vote.user.username === participant.username,
+              )
+              return {
+                ...participant,
+                vote: vote ? vote.value : null,
+              }
+            }),
+          ),
+        )
+      })
+    }
+    await api.get(`/stories/${story.id}/getstory`).then((response) => {
       setRevealVotes(response.data.is_revealed)
     })
 
@@ -290,16 +294,18 @@ const Room: React.FC = () => {
   }
 
   const handleClickStory = (story: Story) => {
-    handleSetActiveStory(story)
+    if (activeStory?.id !== story.id) {
+      handleSetActiveStory(story, true)
+    }
   }
 
   const handleDeleteStory = async (storyId: number) => {
     const title = activeStory?.title
 
     if (activeStory?.id === storyId && activeStory?.id !== stories[0].id) {
-      handleSetActiveStory(stories[0])
+      handleSetActiveStory(stories[0], false)
     } else if (activeStory?.id === storyId) {
-      handleSetActiveStory(stories[1])
+      handleSetActiveStory(stories[1], false)
     }
 
     setStories((prevStories) =>
@@ -414,6 +420,19 @@ const Room: React.FC = () => {
     setUserVoteValue(value)
   }
 
+  const handleCopyRoomLink = () => {
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => {
+        console.log('Room link copied')
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1000) // Revert after 1s
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err)
+      })
+  }
+
   return (
     <div className="flex min-h-screen">
       {/* Account Dropdown */}
@@ -503,10 +522,42 @@ const Room: React.FC = () => {
 
       {/* Main Content */}
       <div className="mt-10 flex-1 p-6">
-        <h1 className="text-xl text-white">
-          <b>Room:</b> {roomName} <br />
-          <b>Story:</b> {activeStory?.title}
-        </h1>
+        <h2 className="text-lg text-white">
+          <p>
+            <span className="font-bold">Code:&nbsp;&nbsp;&nbsp;</span>
+            {roomCode}
+          </p>
+          <div className="flex gap-2">
+            <span className="font-bold">Room:</span> {roomName}
+            <div className="group relative h-[25px] w-[25px]">
+              {/* Tooltip */}
+              <div className="pointer-events-none absolute top-8 left-1/2 z-50 -translate-x-1/2 rounded bg-zinc-700 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity duration-1000 group-hover:opacity-100">
+                Copy room link
+              </div>
+
+              {/* Link Icon */}
+              <IoIosLink
+                onClick={handleCopyRoomLink}
+                className={`absolute top-0.5 left-0 h-full w-full cursor-pointer transition-opacity duration-300 ${
+                  copied ? 'pointer-events-none opacity-0' : 'opacity-100'
+                } text-emerald-200`}
+                size={25}
+              />
+
+              {/* Checkmark Icon */}
+              <IoCheckmarkCircle
+                className={`absolute top-0.5 left-0 h-full w-full transition-opacity duration-300 ${
+                  copied ? 'opacity-100' : 'pointer-events-none opacity-0'
+                } text-emerald-400`}
+                size={25}
+              />
+            </div>
+          </div>
+          <div>
+            <span className="font-bold">Story:&nbsp;&nbsp;&nbsp;</span>
+            {activeStory?.title}
+          </div>
+        </h2>
         <div className="flex items-center justify-center">
           <div className="mt-6">
             <ul className="flex flex-wrap gap-4">
@@ -547,7 +598,7 @@ const Room: React.FC = () => {
               >
                 {revealVotes ? 'Hide Votes' : 'Reveal Votes'}
               </button>
-              {!revealVotes && <span className="mb-10" />}
+              {!revealVotes && <span className="mb-18" />}
 
               {revealVotes && (
                 <button
@@ -562,10 +613,10 @@ const Room: React.FC = () => {
         </div>
       </div>
       {/* Fixed Vote Button at the bottom */}
-      <div className="fixed bottom-0 left-[calc(50%)] mb-6 -translate-x-1/2 transform">
+      <div className="absolute bottom-0 left-[calc(50%)] mb-6 -translate-x-1/2 transform">
         {!revealVotes && (
           <button
-            className="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
+            className="mb-8 rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
             onClick={handleVote}
           >
             Vote

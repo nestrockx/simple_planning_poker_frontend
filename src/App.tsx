@@ -25,15 +25,15 @@ const App: React.FC = () => {
         >
           <FaGithubAlt size={32} />
         </a>
+        <a
+          href="https://www.linkedin.com/in/pawe%C5%82-kraszewski-87b872162/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute top-4 right-15 text-white transition hover:text-zinc-500"
+        >
+          <IoLogoLinkedin size={32} />
+        </a>
       </header>
-      <a
-        href="https://www.linkedin.com/in/pawe%C5%82-kraszewski-87b872162/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute top-4 right-15 text-white transition hover:text-zinc-500"
-      >
-        <IoLogoLinkedin size={32} />
-      </a>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Auth />} />
@@ -44,6 +44,9 @@ const App: React.FC = () => {
           <Route path="/guest" element={<Guest />} />
         </Routes>
       </BrowserRouter>
+      <footer className="absolute right-0 bottom-0 p-4 text-sm text-zinc-400">
+        &copy; Paweł Kraszewski 2025
+      </footer>
     </div>
   )
 }

@@ -20,6 +20,8 @@ const Auth: React.FC = () => {
       if (activeTab === 'login') {
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
 
+        localStorage.clear()
+        sessionStorage.clear()
         if (loginRedirect != null) {
           navigate(loginRedirect)
         } else {
@@ -28,6 +30,8 @@ const Auth: React.FC = () => {
       } else {
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
 
+        localStorage.clear()
+        sessionStorage.clear()
         if (loginRedirect != null) {
           navigate(loginRedirect)
         } else {

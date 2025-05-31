@@ -19,12 +19,12 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex items-center justify-center">
       <ReturnHome />
       {/* <AccountDropdown /> */}
-      <div className="mt-14 text-center sm:mt-0">
+      <div className="mt-[18vh] text-center sm:mt-[38vh]">
         <h1
-          className="montserrat mt-25 mb-10 text-6xl font-bold text-white sm:mt-0"
+          className="montserrat mt-25 mb-10 px-5 text-5xl font-bold text-white sm:mt-0"
           style={{ textShadow: '8px 8px 16px rgba(0, 0, 0, 1.0)' }}
         >
           Welcome to the Simple Planning Poker
@@ -32,12 +32,12 @@ const Home: React.FC = () => {
 
         <p
           style={{ textShadow: '4px 4px 8px rgba(0, 0, 0, 0.8)' }}
-          className="montserrat mb-10 text-lg font-bold text-zinc-300"
+          className="montserrat mb-10 px-5 text-lg font-bold text-zinc-300"
         >
           Simple and fun tool for story points estimation.
         </p>
         <button
-          className="glow-on-hover montserrat mb-8 text-base text-zinc-300 sm:mb-0"
+          className="glow-on-hover montserrat mb-16 text-base text-zinc-300 sm:mb-40"
           onClick={handleStart}
           onMouseEnter={handleHover}
         >

@@ -11,8 +11,8 @@ const Account: React.FC = () => {
   const [nickname, setNickname] = useState<string | null>(null)
   const [editingNickname, setEditingNickname] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [loading] = useState(false)
-  const [successMsg] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -44,7 +44,25 @@ const Account: React.FC = () => {
     }
   }
 
-  const handleSaveNickname = async () => {}
+  const handleSaveNickname = async () => {
+    if (!editingNickname || editingNickname === nickname) {
+      setIsEditing(false)
+      return
+    }
+    setLoading(true)
+    try {
+      await api.post('/profile/', { nickname: editingNickname })
+      setNickname(editingNickname)
+      localStorage.setItem('nickname', editingNickname)
+      setSuccessMsg('Display name updated successfully.')
+      setTimeout(() => setSuccessMsg(null), 1500)
+    } catch (error) {
+      console.error('Failed to update nickname:', error)
+    } finally {
+      setLoading(false)
+      setIsEditing(false)
+    }
+  }
 
   const handleCancelEdit = () => {
     setEditingNickname(nickname)
@@ -64,7 +82,7 @@ const Account: React.FC = () => {
         My Account
       </h1>
       <div className="mx-6 flex justify-center">
-        <div className="w-full max-w-md rounded-2xl bg-zinc-950/70 p-8 shadow-xl backdrop-blur-md">
+        <div className="mb-16 w-full max-w-md rounded-2xl bg-zinc-950/70 p-8 shadow-xl backdrop-blur-md">
           <h2 className="mb-6 text-2xl font-semibold text-white">Profile</h2>
 
           <div className="mb-5">
@@ -86,13 +104,13 @@ const Account: React.FC = () => {
               <div>
                 <input
                   type="text"
-                  className="mt-1 w-full rounded-md bg-zinc-900 px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="mt-1 w-full rounded-md bg-zinc-900 px-3 py-2 text-lg text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   value={editingNickname || ''}
                   onChange={(e) => setEditingNickname(e.target.value)}
                 />
                 <div className="mt-2 flex justify-end gap-2">
                   <button
-                    className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700 disabled:opacity-50"
+                    className="rounded bg-emerald-600 px-3 py-1 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
                     onClick={handleSaveNickname}
                     disabled={loading || editingNickname === nickname}
                   >
@@ -117,7 +135,7 @@ const Account: React.FC = () => {
 
           <div className="mt-6 text-right">
             <button
-              className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              className="rounded bg-rose-700 px-4 py-2 text-white hover:bg-rose-800"
               onClick={handleLogout}
             >
               Logout

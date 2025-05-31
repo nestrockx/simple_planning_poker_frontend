@@ -18,6 +18,8 @@ const Guest: React.FC = () => {
       .then(() => {
         const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
 
+        localStorage.clear()
+        sessionStorage.clear()
         if (loginRedirect != null) {
           window.location.href = loginRedirect
         } else {
