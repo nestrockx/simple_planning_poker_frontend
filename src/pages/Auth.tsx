@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiInfo } from 'react-icons/fi'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
+import request from '../api/request'
 
 const Auth: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
@@ -12,31 +13,41 @@ const Auth: React.FC = () => {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  useEffect(() => {
+    setError('')
+  }, [activeTab])
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
+    if (password.length < 7) {
+      setError('Password must be at least 7 characters long.')
+      return
+    }
+
     try {
       if (activeTab === 'login') {
-        const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
-
-        localStorage.clear()
-        sessionStorage.clear()
-        if (loginRedirect != null) {
-          navigate(loginRedirect)
-        } else {
-          navigate('/start/')
-        }
+        await request.post('/auth/login/', {
+          username,
+          password,
+        })
       } else {
-        const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
+        await request.post('/auth/register/', {
+          username,
+          nickname,
+          password,
+        })
+      }
 
-        localStorage.clear()
-        sessionStorage.clear()
-        if (loginRedirect != null) {
-          navigate(loginRedirect)
-        } else {
-          navigate('/start/')
-        }
+      const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
+      localStorage.clear()
+      sessionStorage.clear()
+
+      if (loginRedirect != null) {
+        navigate(loginRedirect)
+      } else {
+        navigate('/start/')
       }
     } catch (err) {
       console.error(err)
