@@ -21,6 +21,7 @@ const Room: React.FC = () => {
   const sidebarRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
 
+  const [summon, setSummon] = useState<string>('Summon')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [stories, setStories] = useState<Story[]>([])
   const [newStory, setNewStory] = useState('')
@@ -57,6 +58,19 @@ const Room: React.FC = () => {
   }
 
   useEffect(() => {
+    storiesRef.current = stories
+  }, [stories])
+
+  useEffect(() => {
+    activeStoryRef.current = activeStory
+  }, [activeStory])
+
+  useEffect(() => {
+    connectToRevealWebSocket()
+    fetchRoomData()
+  }, [])
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const sidebar = sidebarRef.current
       const hamburgerBtn = hamburgerButtonRef.current
@@ -84,10 +98,6 @@ const Room: React.FC = () => {
   }, [isSidebarOpen])
 
   useEffect(() => {
-    storiesRef.current = stories
-  }, [stories])
-
-  useEffect(() => {
     setParticipantsVoted(
       participants.map((participant) => ({
         ...participant,
@@ -112,16 +122,44 @@ const Room: React.FC = () => {
         setHasAnyVotes(response.data.length > 0)
       })
     }
-  }, [participants])
+  }, [activeStory?.id, participants])
 
-  useEffect(() => {
-    connectToRevealWebSocket()
-    fetchRoomData()
-  }, [])
+  const fetchRoomData = async () => {
+    api.get(`/rooms/${roomCode}/`).then((roomResponse) => {
+      setRoomId(roomResponse.data.id)
+      setRoomName(roomResponse.data.name)
+      setParticipants(
+        [...roomResponse.data.participants].sort((a, b) =>
+          a.profile.nickname.localeCompare(b.profile.nickname),
+        ),
+      )
 
-  useEffect(() => {
-    activeStoryRef.current = activeStory
-  }, [activeStory])
+      setVoteType(roomResponse.data.type)
+
+      api.get(`/stories/${roomResponse.data.id}/`).then((storiesResponse) => {
+        setStories(
+          storiesResponse.data.map(
+            (story: { id: number; title: string; is_revealed: string }) => ({
+              id: story.id,
+              title: story.title,
+              is_revealed: story.is_revealed,
+            }),
+          ),
+        )
+
+        if (sessionStorage.getItem('activeRoomCode') === roomCode) {
+          const activeStory = sessionStorage.getItem('activeStory')
+          if (activeStory === null) {
+            handleSetActiveStory(storiesResponse.data[0], false)
+          } else {
+            handleSetActiveStory(JSON.parse(activeStory), false)
+          }
+        } else {
+          handleSetActiveStory(storiesResponse.data[0], false)
+        }
+      })
+    })
+  }
 
   const connectToRevealWebSocket = async () => {
     if (!roomCode) return
@@ -210,6 +248,20 @@ const Room: React.FC = () => {
         } else if (activeStoryRef.current?.id === data.story.id) {
           handleSetActiveStory(storiesRef.current[1], false)
         }
+      } else if (data.type === 'summon') {
+        if (activeStoryRef.current?.id !== data.story.id) {
+          const newStory: Story = {
+            id: data.story.id,
+            title: data.story.title,
+            is_revealed: data.story.is_revealed,
+          }
+          handleSetActiveStory(newStory, true)
+        } else {
+          setSummon('Others joined')
+          setTimeout(() => {
+            setSummon('Summon')
+          }, 1000)
+        }
       }
     }
 
@@ -220,40 +272,6 @@ const Room: React.FC = () => {
     return () => {
       ws.close()
     }
-  }
-
-  const fetchRoomData = async () => {
-    api.get(`/rooms/${roomCode}/`).then((roomResponse) => {
-      setRoomId(roomResponse.data.id)
-      setRoomName(roomResponse.data.name)
-      setParticipants(
-        [...roomResponse.data.participants].sort((a, b) =>
-          a.profile.nickname.localeCompare(b.profile.nickname),
-        ),
-      )
-
-      setVoteType(roomResponse.data.type)
-
-      api.get(`/stories/${roomResponse.data.id}/`).then((storiesResponse) => {
-        setStories(
-          storiesResponse.data.map((story: { id: number; title: string }) => ({
-            id: story.id,
-            title: story.title,
-          })),
-        )
-
-        if (sessionStorage.getItem('activeRoomCode') === roomCode) {
-          const activeStory = sessionStorage.getItem('activeStory')
-          if (activeStory === null) {
-            handleSetActiveStory(storiesResponse.data[0], false)
-          } else {
-            handleSetActiveStory(JSON.parse(activeStory), false)
-          }
-        } else {
-          handleSetActiveStory(storiesResponse.data[0], false)
-        }
-      })
-    })
   }
 
   const sortParticipantsByNickname = (participants: Participant[]) =>
@@ -286,6 +304,7 @@ const Room: React.FC = () => {
     await api.get(`/stories/${story.id}/getstory`).then((response) => {
       setRevealVotes(response.data.is_revealed)
     })
+    // setRevealVotes(story.is_revealed)
 
     sessionStorage.setItem('activeRoomCode', roomCode || '')
   }
@@ -373,7 +392,7 @@ const Room: React.FC = () => {
 
   const handleConfirmVote = async () => {
     setIsDialogOpen(false)
-    api
+    await api
       .post(`/votes/`, { story_id: activeStory?.id, value: userVoteValue })
       .then(() => {
         if (roomWebSocket?.readyState === WebSocket.OPEN) {
@@ -440,6 +459,8 @@ const Room: React.FC = () => {
           }),
         )
       }
+    } else {
+      console.warn('WebSocket not ready yet')
     }
     //setTimeout(() => handleRevealVotes(false), 100)
   }
@@ -473,6 +494,21 @@ const Room: React.FC = () => {
       .catch((err) => {
         console.error('Failed to copy: ', err)
       })
+  }
+
+  const handleSummon = (story: Story) => {
+    if (roomWebSocket?.readyState === WebSocket.OPEN) {
+      roomWebSocket.send(
+        JSON.stringify({
+          story_id: story.id,
+          title: story.title,
+          is_revealed: story.is_revealed,
+          action: 'summon',
+        }),
+      )
+    } else {
+      console.warn('WebSocket not ready yet')
+    }
   }
 
   return (
@@ -512,11 +548,13 @@ const Room: React.FC = () => {
                   <div className="flex gap-0">
                     {activeStory?.id === story.id && (
                       <button
-                        onClick={() => {}}
-                        className="my-1 rounded-xl px-2 py-1 text-sm duration-200 hover:bg-emerald-950"
+                        onClick={() => {
+                          handleSummon(story)
+                        }}
+                        className="my-1 rounded-xl px-2 py-1 text-sm hover:bg-emerald-950 active:bg-black"
                         title="Gather all particpants to vote"
                       >
-                        Summon
+                        {summon}
                       </button>
                     )}
                     <button
@@ -598,7 +636,7 @@ const Room: React.FC = () => {
               <IoCheckmarkCircle
                 className={`absolute top-1 left-0 h-full w-full transition-opacity duration-300 ${
                   codeCopied ? 'opacity-100' : 'pointer-events-none opacity-0'
-                } text-cyan-400`}
+                } text-cyan-200`}
               />
             </div>
           </div>
@@ -622,12 +660,12 @@ const Room: React.FC = () => {
               <IoCheckmarkCircle
                 className={`absolute top-1 left-0 h-full w-full transition-opacity duration-300 ${
                   linkCopied ? 'opacity-100' : 'pointer-events-none opacity-0'
-                } text-cyan-400`}
+                } text-cyan-200`}
               />
             </div>
           </div>
-          <div>
-            <span className="font-bold">Story:&nbsp;&nbsp;&nbsp;</span>
+          <div className="flex gap-3">
+            <span className="font-bold">Story: </span>
             {activeStory?.title}
           </div>
         </h2>
