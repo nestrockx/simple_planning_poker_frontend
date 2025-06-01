@@ -11,10 +11,8 @@ const AccountDropdown: React.FC = () => {
 
   useEffect(() => {
     if (localStorage.getItem('username')) {
-      console.log('XD')
       setUsername(localStorage.getItem('username'))
     } else {
-      console.log('XD2')
       fetchUserData()
     }
   }, [])
@@ -78,7 +76,7 @@ const AccountDropdown: React.FC = () => {
         ) : (
           <button
             onClick={handleLogin}
-            className="w-full rounded-md px-2 py-1 text-left text-sm transition hover:bg-zinc-800 hover:text-blue-400"
+            className="w-full rounded-md px-2 py-1 text-left text-sm transition hover:bg-zinc-800 hover:text-emerald-400"
           >
             Login
           </button>

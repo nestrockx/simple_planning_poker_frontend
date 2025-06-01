@@ -128,14 +128,14 @@ const Account: React.FC = () => {
           </div>
 
           {successMsg && (
-            <div className="mb-4 rounded bg-green-600 px-3 py-2 text-white">
+            <div className="mb-4 rounded bg-emerald-600 px-3 py-2 text-white">
               {successMsg}
             </div>
           )}
 
           <div className="mt-6 text-right">
             <button
-              className="rounded bg-rose-700 px-4 py-2 text-white hover:bg-rose-800"
+              className="rounded bg-rose-800 px-4 py-2 text-white hover:bg-rose-900"
               onClick={handleLogout}
             >
               Logout

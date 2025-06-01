@@ -234,9 +234,7 @@ const Room: React.FC = () => {
 
       setVoteType(roomResponse.data.type)
 
-      console.log('Stories: ' + roomResponse.data.id)
       api.get(`/stories/${roomResponse.data.id}/`).then((storiesResponse) => {
-        console.log('storiesResponse.data: ', storiesResponse.data)
         setStories(
           storiesResponse.data.map((story: { id: number; title: string }) => ({
             id: story.id,
@@ -667,7 +665,7 @@ const Room: React.FC = () => {
             {/* Reveal Votes Button under boxes */}
             <div className="mt-6 flex flex-col items-center space-y-3">
               <button
-                className="rounded-md bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800 disabled:bg-zinc-600 disabled:opacity-50"
+                className="rounded-md border-2 border-emerald-700 bg-zinc-950 px-4 py-2 text-white hover:bg-emerald-900 active:bg-emerald-700 disabled:border-0 disabled:bg-zinc-600 disabled:opacity-50"
                 onClick={() => handleRevealVotes(!revealVotes)}
                 disabled={!hasAnyVotes}
               >
@@ -677,7 +675,7 @@ const Room: React.FC = () => {
 
               {revealVotes && (
                 <button
-                  className="rounded-md bg-rose-800 px-4 py-2 text-white hover:bg-rose-900"
+                  className="rounded-md border-2 border-rose-800 bg-zinc-950 px-4 py-2 text-white hover:bg-rose-950 active:bg-rose-800"
                   onClick={() => handleResetVotes()}
                 >
                   Reset Votes
@@ -691,7 +689,7 @@ const Room: React.FC = () => {
       <div className="absolute bottom-0 left-[calc(50%)] mb-6 -translate-x-1/2 transform">
         {!revealVotes && (
           <button
-            className="mb-8 rounded-md bg-cyan-800 px-4 py-2 text-white hover:bg-cyan-900"
+            className="mb-8 rounded-md bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800"
             onClick={handleVote}
           >
             Vote
@@ -711,7 +709,7 @@ const Room: React.FC = () => {
                   onClick={() => handleSetUserVoteValue(option)}
                   className={`rounded-md py-2 text-center ${
                     userVoteValue === option
-                      ? 'bg-cyan-700'
+                      ? 'bg-emerald-700'
                       : 'bg-zinc-700 hover:bg-zinc-600'
                   }`}
                 >
@@ -728,7 +726,7 @@ const Room: React.FC = () => {
                 Cancel
               </button>
               <button
-                className="rounded bg-cyan-700 px-4 py-2 hover:bg-cyan-800 disabled:opacity-50"
+                className="rounded bg-emerald-700 px-4 py-2 hover:bg-emerald-800 disabled:opacity-50"
                 onClick={handleConfirmVote}
                 disabled={userVoteValue === null}
               >
