@@ -11,6 +11,7 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
   const [error, setError] = useState('')
+  const [registered, setRegistered] = useState<boolean>(false)
   const navigate = useNavigate()
 
   const getPasswordValidationStatus = (password: string) => {
@@ -76,10 +77,21 @@ const Auth: React.FC = () => {
       localStorage.clear()
       sessionStorage.clear()
 
-      if (loginRedirect != null) {
-        navigate(loginRedirect)
+      if (activeTab === 'register') {
+        setRegistered(true)
+        setTimeout(() => {
+          if (loginRedirect != null) {
+            navigate(loginRedirect)
+          } else {
+            navigate('/start/')
+          }
+        }, 2000)
       } else {
-        navigate('/start/')
+        if (loginRedirect != null) {
+          navigate(loginRedirect)
+        } else {
+          navigate('/start/')
+        }
       }
     } catch (err) {
       console.error(err)
@@ -191,7 +203,7 @@ const Auth: React.FC = () => {
             />
           </div>
 
-          {activeTab === 'register' && (
+          {activeTab === 'register' && !registered && (
             <ul className="mt-2 mb-4 space-y-1 text-sm text-white">
               <li
                 className={
@@ -238,12 +250,20 @@ const Auth: React.FC = () => {
             </ul>
           )}
 
-          <button
-            type="submit"
-            className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
-          >
-            {activeTab === 'login' ? 'Login' : 'Register'}
-          </button>
+          {!registered && (
+            <button
+              type="submit"
+              className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
+            >
+              {activeTab === 'login' ? 'Login' : 'Register'}
+            </button>
+          )}
+
+          {registered && (
+            <div className="mt-5 rounded-xl bg-emerald-600 p-3 text-white">
+              Succesfully registered, redirecting...
+            </div>
+          )}
         </form>
         {activeTab === 'login' && (
           <button

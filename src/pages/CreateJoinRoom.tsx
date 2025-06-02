@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/api'
 import AccountDropdown from '../components/AccountDropdown'
@@ -15,10 +15,6 @@ const CreateJoinRoom: React.FC = () => {
   const [joinError, setJoinError] = useState('')
 
   const navigate = useNavigate()
-
-  useEffect(() => {
-    api.get('/empty/')
-  }, [])
 
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault()
