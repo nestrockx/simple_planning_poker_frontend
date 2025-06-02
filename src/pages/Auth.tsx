@@ -4,6 +4,8 @@ import { FiInfo } from 'react-icons/fi'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
 import request from '../api/request'
+import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
+import '@fontsource/montserrat/600.css'
 
 const Auth: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
@@ -11,8 +13,9 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
   const [error, setError] = useState('')
-  const [registered, setRegistered] = useState<boolean>(false)
   const navigate = useNavigate()
+  const [registered, setRegistered] = useState<boolean>(false)
+  const [requesting, setRequesting] = useState<boolean>(false)
 
   const getPasswordValidationStatus = (password: string) => {
     return {
@@ -44,6 +47,7 @@ const Auth: React.FC = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
+    setRequesting(true)
     setError('')
 
     if (username.length < 4) {
@@ -78,6 +82,7 @@ const Auth: React.FC = () => {
       sessionStorage.clear()
 
       if (activeTab === 'register') {
+        setRequesting(false)
         setRegistered(true)
         setTimeout(() => {
           if (loginRedirect != null) {
@@ -87,6 +92,7 @@ const Auth: React.FC = () => {
           }
         }, 2000)
       } else {
+        setRequesting(false)
         if (loginRedirect != null) {
           navigate(loginRedirect)
         } else {
@@ -142,7 +148,7 @@ const Auth: React.FC = () => {
 
         {/* Auth Form */}
         <form onSubmit={handleAuth}>
-          <h2 className="mb-4 text-2xl font-bold text-white capitalize">
+          <h2 className="montserrat mb-4 text-2xl font-bold text-white capitalize">
             {activeTab}
           </h2>
 
@@ -203,7 +209,7 @@ const Auth: React.FC = () => {
             />
           </div>
 
-          {activeTab === 'register' && !registered && (
+          {activeTab === 'register' && !registered && !requesting && (
             <ul className="mt-2 mb-4 space-y-1 text-sm text-white">
               <li
                 className={
@@ -250,7 +256,7 @@ const Auth: React.FC = () => {
             </ul>
           )}
 
-          {!registered && (
+          {!registered && !requesting && (
             <button
               type="submit"
               className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
@@ -265,7 +271,7 @@ const Auth: React.FC = () => {
             </div>
           )}
         </form>
-        {activeTab === 'login' && (
+        {activeTab === 'login' && !requesting && (
           <button
             type="button"
             onClick={handleGuestLogin}
@@ -274,6 +280,7 @@ const Auth: React.FC = () => {
             Continue as Guest
           </button>
         )}
+        {requesting && <LoadingSpinnerEmerald />}
       </div>
     </div>
   )

@@ -58,17 +58,17 @@ const AccountDropdown: React.FC = () => {
         {localStorage.getItem('username') ? (
           <>
             <div className="mb-2 border-b border-zinc-600 px-1 pb-2 font-bold text-zinc-300 capitalize">
-              {username}
+              Hi {username}!
             </div>
             <button
               onClick={handleAccountClick}
-              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-emerald-400"
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-zinc-300"
             >
               Account
             </button>
             <button
               onClick={handleLogout}
-              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-rose-400"
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-zinc-300"
             >
               Logout
             </button>

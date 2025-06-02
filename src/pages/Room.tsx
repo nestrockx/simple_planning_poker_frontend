@@ -552,7 +552,7 @@ const Room: React.FC = () => {
                           handleSummon(story)
                         }}
                         className="my-1 rounded-xl px-2 py-1 text-sm hover:bg-emerald-950 active:bg-black"
-                        title="Gather all particpants to vote"
+                        title="Gather all participants to vote"
                       >
                         {summon}
                       </button>
@@ -616,8 +616,8 @@ const Room: React.FC = () => {
       {/* Main Content */}
       <div className="mt-10 flex-1 p-6">
         <h2 className="text-lg text-white">
-          <div className="flex gap-2">
-            <span className="font-bold">Code:&nbsp;</span> {roomCode}
+          <div className="flex gap-3">
+            <span className="montserrat font-bold">Code: </span> {roomCode}
             <div className="group relative h-[20px] w-[20px]">
               {/* Tooltip */}
               <div className="pointer-events-none absolute top-8 left-1/2 z-50 -translate-x-1/2 rounded bg-zinc-700 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity duration-1000 group-hover:opacity-100">
@@ -629,14 +629,14 @@ const Room: React.FC = () => {
                 onClick={handleCopyRoomCode}
                 className={`absolute top-1 left-0 h-full w-full cursor-pointer transition-opacity duration-300 ${
                   codeCopied ? 'pointer-events-none opacity-0' : 'opacity-100'
-                } text-cyan-200`}
+                } text-emerald-200`}
               />
 
               {/* Checkmark Icon */}
               <IoCheckmarkCircle
                 className={`absolute top-1 left-0 h-full w-full transition-opacity duration-300 ${
                   codeCopied ? 'opacity-100' : 'pointer-events-none opacity-0'
-                } text-cyan-200`}
+                } text-emerald-200`}
               />
             </div>
           </div>
@@ -653,14 +653,14 @@ const Room: React.FC = () => {
                 onClick={handleCopyRoomLink}
                 className={`absolute top-1 left-0 h-full w-full cursor-pointer transition-opacity duration-300 ${
                   linkCopied ? 'pointer-events-none opacity-0' : 'opacity-100'
-                } text-cyan-200`}
+                } text-emerald-200`}
               />
 
               {/* Checkmark Icon */}
               <IoCheckmarkCircle
                 className={`absolute top-1 left-0 h-full w-full transition-opacity duration-300 ${
                   linkCopied ? 'opacity-100' : 'pointer-events-none opacity-0'
-                } text-cyan-200`}
+                } text-emerald-200`}
               />
             </div>
           </div>
@@ -679,20 +679,30 @@ const Room: React.FC = () => {
                 >
                   <div className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-b-2 border-neutral-700 bg-gradient-to-br from-neutral-900 to-black shadow-lg">
                     {/* Gloss layer */}
-                    <div className="absolute inset-0">
-                      {/* Curved glossy highlight */}
+                    <div className="pointer-events-none absolute inset-0">
                       <div className="absolute top-0 left-0 h-2/3 w-full rounded-b-full bg-white/18 blur-sm" />
-                      {/* Bottom subtle glow */}
                       <div className="absolute right-2 bottom-2 h-12 w-12 rounded-full bg-white/8 blur-xl" />
                     </div>
-                    {/* Add voting state */}
-                    {participantVoted.vote != null ? (
-                      <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-800 text-3xl font-bold text-white">
-                        {revealVotes ? participantVoted.vote : null}
-                      </div>
-                    ) : (
-                      <div className="h-14 w-14 rounded-3xl bg-zinc-700" />
-                    )}
+
+                    {/* Vote background bubble */}
+                    <div
+                      className={`flex h-14 w-14 items-center justify-center rounded-3xl transition-all duration-500 ${
+                        participantVoted.vote != null
+                          ? 'bg-emerald-800'
+                          : 'bg-zinc-700'
+                      }`}
+                    >
+                      {/* Vote number with fade in/out */}
+                      <span
+                        className={`text-3xl font-bold text-white transition-opacity duration-500 ${
+                          revealVotes && participantVoted.vote != null
+                            ? 'opacity-100'
+                            : 'opacity-0'
+                        }`}
+                      >
+                        {participantVoted.vote}
+                      </span>
+                    </div>
                   </div>
                   <span className="mt-2 text-lg text-white">
                     {participantVoted.profile.nickname}

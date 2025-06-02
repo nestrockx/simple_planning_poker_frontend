@@ -5,6 +5,7 @@ import AccountDropdown from '../components/AccountDropdown'
 import { useNavigate } from 'react-router-dom'
 import request from '../api/request'
 import { CiEdit } from 'react-icons/ci'
+import '@fontsource/montserrat/400.css'
 
 const Account: React.FC = () => {
   const [username, setUsername] = useState<string | null>(null)
@@ -78,9 +79,9 @@ const Account: React.FC = () => {
     <div>
       <ReturnHome />
       <AccountDropdown />
-      <h1 className="pt-22 pb-8 text-center text-3xl font-bold text-white">
+      <div className="montserrat pt-22 pb-8 text-center text-3xl text-white">
         My Account
-      </h1>
+      </div>
       <div className="mx-6 flex justify-center">
         <div className="mb-16 w-full max-w-md rounded-2xl bg-zinc-950/70 p-8 shadow-xl backdrop-blur-md">
           <h2 className="mb-6 text-2xl font-semibold text-white">Profile</h2>

@@ -3,3 +3,7 @@
 body {
   @apply bg-zinc-900;
 }
+
+.montserrat {
+  font-family: 'Montserrat', sans-serif;
+}

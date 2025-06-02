@@ -1,15 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FiInfo } from 'react-icons/fi'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
 import request from '../api/request'
+import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
+import '@fontsource/montserrat/600.css'
 
 const Guest: React.FC = () => {
-  const [error, setError] = React.useState('')
-  const [nickname, setNickname] = React.useState('')
+  const [error, setError] = useState<string>('')
+  const [nickname, setNickname] = useState<string>('')
+  const [requesting, setRequesting] = useState<boolean>()
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setRequesting(true)
 
     request
       .post('/auth/guestlogin/', {
@@ -29,6 +34,7 @@ const Guest: React.FC = () => {
       .catch((error) => {
         console.error('Error during guest login:', error)
         setError('Guest login failed.')
+        setRequesting(false)
       })
   }
 
@@ -40,7 +46,7 @@ const Guest: React.FC = () => {
       <div className="w-full max-w-sm rounded-xl bg-zinc-950/70 p-6 shadow-lg backdrop-blur-md">
         {/* Auth Form */}
         <form onSubmit={handleAuth}>
-          <h2 className="mb-4 text-2xl font-bold text-white capitalize">
+          <h2 className="montserrat mb-4 text-2xl font-bold text-white capitalize">
             Guest login
           </h2>
           {error && <div className="mb-2 text-red-500">{error}</div>}
@@ -62,12 +68,16 @@ const Guest: React.FC = () => {
               required
             />
           </div>
-          <button
-            type="submit"
-            className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
-          >
-            Continue
-          </button>
+          {!requesting ? (
+            <button
+              type="submit"
+              className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
+            >
+              Continue
+            </button>
+          ) : (
+            <LoadingSpinnerEmerald />
+          )}
         </form>
       </div>
     </div>
