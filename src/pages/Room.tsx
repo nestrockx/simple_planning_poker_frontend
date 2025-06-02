@@ -572,8 +572,7 @@ const Room: React.FC = () => {
         </div>
 
         {/* Add Story Form */}
-        <form onSubmit={handleAddStory} className="mt-4 px-6">
-          {error && <div className="text-sm text-red-500">{error}</div>}
+        <form onSubmit={handleAddStory} className="px-6">
           <input
             type="text"
             value={newStory}
@@ -587,6 +586,7 @@ const Room: React.FC = () => {
           >
             Add Story
           </button>
+          {error && <div className="text-sm text-red-500">{error}</div>}
         </form>
       </div>
 
