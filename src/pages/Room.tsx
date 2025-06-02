@@ -669,15 +669,15 @@ const Room: React.FC = () => {
             {activeStory?.title}
           </div>
         </h2>
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center p-5">
           <div className="mt-6">
-            <ul className="flex flex-wrap gap-4">
+            <ul className="flex flex-wrap justify-center gap-4">
               {participantsVoted.map((participantVoted) => (
                 <li
                   key={participantVoted.id}
                   className="flex flex-col items-center justify-center text-center"
                 >
-                  <div className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-b-2 border-neutral-700 bg-gradient-to-br from-neutral-900 to-black shadow-lg">
+                  <div className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-b-4 border-neutral-700 bg-gradient-to-br from-neutral-900 to-black shadow-lg">
                     {/* Gloss layer */}
                     <div className="pointer-events-none absolute inset-0">
                       <div className="absolute top-0 left-0 h-2/3 w-full rounded-b-full bg-white/18 blur-sm" />
