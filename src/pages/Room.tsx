@@ -694,7 +694,7 @@ const Room: React.FC = () => {
                     >
                       {/* Vote number with fade in/out */}
                       <span
-                        className={`text-3xl font-bold text-white transition-opacity duration-500 ${
+                        className={`text-3xl font-bold text-white transition-opacity duration-500 select-none ${
                           revealVotes && participantVoted.vote != null
                             ? 'opacity-100'
                             : 'opacity-0'

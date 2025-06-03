@@ -9,7 +9,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      sessionStorage.clear()
+      // sessionStorage.clear()
       localStorage.clear()
       if (
         window.location.pathname !== '/login/' &&
@@ -17,6 +17,7 @@ api.interceptors.response.use(
         window.location.pathname !== '/guest/' &&
         window.location.pathname !== '/guest'
       ) {
+        console.log(window.location.pathname)
         sessionStorage.setItem('afterLoginRedirect', window.location.pathname)
         window.location.href = '/login/' // Force redirect to login page
       }

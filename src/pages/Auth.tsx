@@ -21,7 +21,7 @@ const Auth: React.FC = () => {
 
   const getPasswordValidationStatus = (password: string) => {
     return {
-      length: password.length >= 7,
+      length: password.length >= 7 && password.length <= 128,
       uppercase: /[A-Z]/.test(password),
       lowercase: /[a-z]/.test(password),
       number: /[0-9]/.test(password),
@@ -57,11 +57,15 @@ const Auth: React.FC = () => {
       return
     }
     if (activeTab === 'register' && !isPasswordValid(password)) {
-      setError('Inavlid password')
+      setError('Invalid password')
       return
     }
     if (activeTab === 'login' && password.length < 7) {
       setError('Password must be at least 7 characters long.')
+      return
+    }
+    if (activeTab === 'login' && password.length > 128) {
+      setError('Password cannot be longer than 128 characters.')
       return
     }
 
