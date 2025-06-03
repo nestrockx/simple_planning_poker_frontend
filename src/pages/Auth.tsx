@@ -5,6 +5,8 @@ import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
 import request from '../api/request'
 import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
+import { CgClose } from 'react-icons/cg'
+import { IoIosCheckmarkCircle } from 'react-icons/io'
 import '@fontsource/montserrat/600.css'
 
 const Auth: React.FC = () => {
@@ -212,46 +214,70 @@ const Auth: React.FC = () => {
           {activeTab === 'register' && !registered && !requesting && (
             <ul className="mt-2 mb-4 space-y-1 text-sm text-white">
               <li
-                className={
-                  passwordValidation.length ? 'text-green-400' : 'text-red-400'
-                }
+                className={`flex gap-2 ${
+                  passwordValidation.length ? 'text-green-400' : 'text-zinc-400'
+                }`}
               >
-                {passwordValidation.length ? '✅' : '❌'} At least 7 characters
+                {passwordValidation.length ? (
+                  <IoIosCheckmarkCircle size={20} />
+                ) : (
+                  <CgClose className="text-rose-500" size={20} />
+                )}
+                At least 7 characters
               </li>
               <li
-                className={
+                className={`flex gap-2 ${
                   passwordValidation.uppercase
                     ? 'text-green-400'
-                    : 'text-red-400'
-                }
+                    : 'text-zinc-400'
+                }`}
               >
-                {passwordValidation.uppercase ? '✅' : '❌'} At least one
-                uppercase letter
+                {passwordValidation.uppercase ? (
+                  <IoIosCheckmarkCircle size={20} />
+                ) : (
+                  <CgClose className="text-rose-500" size={20} />
+                )}
+                At least one uppercase letter
               </li>
               <li
-                className={
+                className={`flex gap-2 ${
                   passwordValidation.lowercase
                     ? 'text-green-400'
-                    : 'text-red-400'
-                }
+                    : 'text-zinc-400'
+                }`}
               >
-                {passwordValidation.lowercase ? '✅' : '❌'} At least one
-                lowercase letter
+                {passwordValidation.lowercase ? (
+                  <IoIosCheckmarkCircle size={20} />
+                ) : (
+                  <CgClose className="text-rose-500" size={20} />
+                )}
+                At least one lowercase letter
               </li>
               <li
-                className={
-                  passwordValidation.number ? 'text-green-400' : 'text-red-400'
-                }
+                className={`flex gap-2 ${
+                  passwordValidation.number ? 'text-green-400' : 'text-zinc-400'
+                }`}
               >
-                {passwordValidation.number ? '✅' : '❌'} At least one number
+                {passwordValidation.number ? (
+                  <IoIosCheckmarkCircle size={20} />
+                ) : (
+                  <CgClose className="text-rose-500" size={20} />
+                )}
+                At least one number
               </li>
               <li
-                className={
-                  passwordValidation.special ? 'text-green-400' : 'text-red-400'
-                }
+                className={`flex gap-2 ${
+                  passwordValidation.special
+                    ? 'text-green-400'
+                    : 'text-zinc-400'
+                }`}
               >
-                {passwordValidation.special ? '✅' : '❌'} At least one special
-                character
+                {passwordValidation.special ? (
+                  <IoIosCheckmarkCircle size={20} />
+                ) : (
+                  <CgClose className="text-rose-500" size={20} />
+                )}
+                At least one special character
               </li>
             </ul>
           )}
