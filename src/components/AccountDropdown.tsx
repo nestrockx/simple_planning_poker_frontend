@@ -54,21 +54,21 @@ const AccountDropdown: React.FC = () => {
       </button>
 
       {/* Dropdown Menu */}
-      <div className="absolute top-11 right-10 z-20 hidden w-46 flex-col rounded-xl bg-zinc-900/50 px-4 py-4 text-white shadow-lg backdrop-blur-md group-hover:flex">
+      <div className="absolute top-11 right-10 z-20 hidden w-46 flex-col rounded-xl bg-zinc-800/50 px-4 py-4 text-white shadow-lg backdrop-blur-md group-hover:flex">
         {localStorage.getItem('username') ? (
           <>
-            <div className="mb-2 border-b border-zinc-600 px-1 pb-2 font-bold text-zinc-300 capitalize">
+            <div className="mb-2 border-b border-zinc-600 px-1 pb-2 font-bold text-zinc-300">
               Hi {username}!
             </div>
             <button
               onClick={handleAccountClick}
-              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-zinc-300"
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-700 hover:text-zinc-300"
             >
               Account
             </button>
             <button
               onClick={handleLogout}
-              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-zinc-300"
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-700 hover:text-zinc-300"
             >
               Logout
             </button>

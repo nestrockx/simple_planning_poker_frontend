@@ -179,7 +179,7 @@ const CreateJoinRoom: React.FC = () => {
         {!createRequesting ? (
           <button
             type="submit"
-            className="w-full rounded-md bg-cyan-700 py-2 text-white transition hover:bg-cyan-800"
+            className="w-full rounded-md bg-cyan-700 py-2 text-white transition hover:bg-cyan-800 active:bg-cyan-900"
           >
             Create Room
           </button>
@@ -214,7 +214,7 @@ const CreateJoinRoom: React.FC = () => {
         {!joinRequesting ? (
           <button
             type="submit"
-            className="w-full rounded-md bg-emerald-700 py-2 text-white transition hover:bg-emerald-800"
+            className="w-full rounded-md bg-emerald-700 py-2 text-white transition hover:bg-emerald-800 active:bg-emerald-900"
           >
             Join Room
           </button>
