@@ -76,7 +76,7 @@ const AccountDropdown: React.FC = () => {
         ) : (
           <button
             onClick={handleLogin}
-            className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-800 hover:text-zinc-300"
+            className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-700 hover:text-zinc-300"
           >
             Login
           </button>
