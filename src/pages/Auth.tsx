@@ -49,7 +49,6 @@ const Auth: React.FC = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
-    setRequesting(true)
     setError('')
 
     if (username.length < 4) {
@@ -68,6 +67,8 @@ const Auth: React.FC = () => {
       setError('Password cannot be longer than 128 characters.')
       return
     }
+
+    setRequesting(true)
 
     try {
       if (activeTab === 'login') {
