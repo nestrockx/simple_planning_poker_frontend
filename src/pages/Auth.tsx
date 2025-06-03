@@ -108,6 +108,7 @@ const Auth: React.FC = () => {
       }
     } catch (err) {
       console.error(err)
+      setRequesting(false)
       if (activeTab === 'login') {
         setError('Invalid username or password.')
       } else {
