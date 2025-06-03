@@ -521,13 +521,13 @@ const Room: React.FC = () => {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`absolute top-0 left-0 z-50 h-full w-70 transform bg-[rgba(24,24,24,0.6)] text-white shadow-lg backdrop-blur-md transition-transform duration-300 ${
+        className={`absolute top-0 left-0 z-50 h-full w-70 transform rounded-e-3xl bg-[rgba(24,24,24,0.6)] text-white shadow-lg backdrop-blur-md transition-transform duration-300 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Home Button */}
         <h2 className="mb-4 px-16 pt-6 pb-2 text-xl font-bold">Stories</h2>
-        <div className="h-[calc(100vh-200px)] overflow-y-auto px-6">
+        <div className="h-[calc(100%-200px)] overflow-y-auto px-6">
           <div className="space-y-2">
             {stories.map((story) => (
               <div
@@ -577,7 +577,7 @@ const Room: React.FC = () => {
             type="text"
             value={newStory}
             onChange={(e) => setNewStory(e.target.value)}
-            className="w-full rounded bg-zinc-600 p-2 text-white"
+            className="mt-4 w-full rounded bg-zinc-600 p-2 text-white"
             placeholder="New Story"
           />
           <button
@@ -641,7 +641,7 @@ const Room: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <span className="font-bold">Room:</span> {roomName}
+            <span className="montserrat font-bold">Room:</span> {roomName}
             <div className="group relative h-[24px] w-[24px]">
               {/* Tooltip */}
               <div className="pointer-events-none absolute top-8 left-1/2 z-50 -translate-x-1/2 rounded bg-zinc-700 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity duration-1000 group-hover:opacity-100">
@@ -665,7 +665,7 @@ const Room: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-3">
-            <span className="font-bold">Story: </span>
+            <span className="montserrat font-bold">Story: </span>
             {activeStory?.title}
           </div>
         </h2>
@@ -723,7 +723,7 @@ const Room: React.FC = () => {
 
               {revealVotes && (
                 <button
-                  className="rounded-md border-2 border-rose-800 bg-zinc-950 px-4 py-2 text-white hover:bg-rose-950 active:bg-rose-800"
+                  className="mb-3 rounded-md border-2 border-rose-800 bg-zinc-950 px-4 py-2 text-white hover:bg-rose-950 active:bg-rose-800"
                   onClick={() => handleResetVotes()}
                 >
                   Reset Votes

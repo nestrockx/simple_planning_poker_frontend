@@ -118,7 +118,7 @@ const Auth: React.FC = () => {
       <AccountDropdown />
       <ReturnHome />
 
-      <div className="w-full max-w-sm rounded-xl bg-zinc-950/70 p-6 shadow-lg backdrop-blur-md">
+      <div className="mx-4 mt-25 mb-15 w-full max-w-sm rounded-xl bg-zinc-950/70 p-6 shadow-lg backdrop-blur-md">
         {/* Tab buttons with animated indicator */}
         <div className="relative mb-6 flex overflow-hidden rounded bg-zinc-800">
           <div

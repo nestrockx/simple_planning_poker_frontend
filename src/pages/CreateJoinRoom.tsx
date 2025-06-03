@@ -102,7 +102,7 @@ const CreateJoinRoom: React.FC = () => {
       {/* Create Room */}
       <form
         onSubmit={handleCreateRoom}
-        className="mt-0 w-full max-w-md space-y-4 rounded-xl bg-zinc-950/70 p-6 shadow-md backdrop-blur-md sm:mt-0"
+        className="mt-5 w-full max-w-md space-y-4 rounded-xl bg-zinc-950/70 p-6 shadow-md backdrop-blur-md sm:mt-0"
       >
         <div className="montserrat text-center text-2xl text-white">
           Create a Planning Poker Room
@@ -191,7 +191,7 @@ const CreateJoinRoom: React.FC = () => {
       {/* Join Room */}
       <form
         onSubmit={handleJoinRoom}
-        className="w-full max-w-md space-y-4 rounded-xl bg-zinc-950/70 p-6 shadow-md backdrop-blur-md"
+        className="mb-10 w-full max-w-md space-y-4 rounded-xl bg-zinc-950/70 p-6 shadow-md backdrop-blur-md"
       >
         <div className="montserrat text-center text-2xl text-white">
           Join a Room

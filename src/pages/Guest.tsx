@@ -43,7 +43,7 @@ const Guest: React.FC = () => {
       <AccountDropdown />
       <ReturnHome />
 
-      <div className="w-full max-w-sm rounded-xl bg-zinc-950/70 p-6 shadow-lg backdrop-blur-md">
+      <div className="mx-4 mt-25 mb-15 w-full max-w-sm rounded-xl bg-zinc-950/70 p-6 shadow-lg backdrop-blur-md">
         {/* Auth Form */}
         <form onSubmit={handleAuth}>
           <h2 className="montserrat mb-4 text-2xl font-bold text-white capitalize">

@@ -98,7 +98,7 @@ const Account: React.FC = () => {
                 <span>{nickname}</span>
                 <CiEdit
                   onClick={handleEditClick}
-                  className="size-7 hover:text-emerald-200"
+                  className="size-7 cursor-pointer text-emerald-100"
                 />
               </div>
             ) : (
