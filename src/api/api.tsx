@@ -9,6 +9,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      sessionStorage.clear()
+      localStorage.clear()
       if (
         window.location.pathname !== '/login/' &&
         window.location.pathname !== '/login' &&
