@@ -14,7 +14,7 @@ const App: React.FC = () => {
   return (
     <div
       className="relative min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: 'url(/images/background2.jpg)' }}
+      style={{ backgroundImage: 'url(/images/background3.jpg)' }}
     >
       <header>
         <a
