@@ -13,6 +13,7 @@ import { FaRegCopy } from 'react-icons/fa'
 import { IoCheckmarkCircle } from 'react-icons/io5'
 import api from '../api/api'
 import ReconnectingWebSocket from 'reconnecting-websocket'
+import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
 
 const Room: React.FC = () => {
   const { roomCode } = useParams<{ roomCode: string }>()
@@ -45,6 +46,7 @@ const Room: React.FC = () => {
   const [userVoteValue, setUserVoteValue] = useState<number | string | null>(
     null,
   )
+  const [websocketConnecting, setWebsocketConnecting] = useState<boolean>(false)
 
   const getVoteOptions = () => {
     switch (voteType) {
@@ -166,6 +168,8 @@ const Room: React.FC = () => {
   const connectToRevealWebSocket = async () => {
     if (!roomCode) return
 
+    setWebsocketConnecting(true)
+
     const rws = new ReconnectingWebSocket(
       `wss://${window.location.host}/ws/reveal/${roomCode}/`,
       [],
@@ -179,6 +183,7 @@ const Room: React.FC = () => {
 
     rws.onopen = () => {
       console.log('WebSocket connected')
+      setWebsocketConnecting(false)
     }
 
     rws.onmessage = (event) => {
@@ -530,6 +535,15 @@ const Room: React.FC = () => {
 
   return (
     <div className="flex min-h-screen">
+      {websocketConnecting && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black opacity-80">
+          <div className="text-xl font-semibold text-white">Connecting...</div>
+          <div className="px-5">
+            <LoadingSpinnerEmerald />
+          </div>
+        </div>
+      )}
+
       {/* Account Dropdown */}
       <AccountDropdown />
       {/* Return Home Button */}
