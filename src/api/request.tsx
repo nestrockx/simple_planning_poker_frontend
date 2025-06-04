@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const request = axios.create({
-  baseURL: '/rest',
+  baseURL: 'http://localhost:8000/',
   withCredentials: true,
 })
 
