@@ -12,6 +12,7 @@ import { IoIosLink } from 'react-icons/io'
 import { FaRegCopy } from 'react-icons/fa'
 import { IoCheckmarkCircle } from 'react-icons/io5'
 import api from '../api/api'
+import ReconnectingWebSocket from 'reconnecting-websocket'
 
 const Room: React.FC = () => {
   const { roomCode } = useParams<{ roomCode: string }>()
@@ -33,7 +34,8 @@ const Room: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [revealVotes, setRevealVotes] = useState(false)
   const [hasAnyVotes, setHasAnyVotes] = useState(false)
-  const [roomWebSocket, setRoomWebSocket] = useState<WebSocket | null>(null)
+  const [roomWebSocket, setRoomWebSocket] =
+    useState<ReconnectingWebSocket | null>(null)
   const [voteType, setVoteType] = useState<string>('default')
   const [linkCopied, setLinkCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
@@ -164,13 +166,22 @@ const Room: React.FC = () => {
   const connectToRevealWebSocket = async () => {
     if (!roomCode) return
 
-    const ws = new WebSocket(
+    const rws = new ReconnectingWebSocket(
       `wss://${window.location.host}/ws/reveal/${roomCode}/`,
+      [],
+      {
+        WebSocket: WebSocket,
+        connectionTimeout: 4000,
+        maxRetries: Infinity,
+        debug: false,
+      },
     )
 
-    ws.onopen = () => {}
+    rws.onopen = () => {
+      console.log('WebSocket connected')
+    }
 
-    ws.onmessage = (event) => {
+    rws.onmessage = (event) => {
       const data = JSON.parse(event.data)
 
       if (data.type === 'reveal_votes') {
@@ -265,12 +276,18 @@ const Room: React.FC = () => {
       }
     }
 
-    ws.onclose = () => {}
+    rws.onerror = (e) => {
+      console.warn('WebSocket error', e)
+    }
 
-    setRoomWebSocket(ws)
+    rws.onclose = () => {
+      console.log('WebSocket closed (will attempt reconnect if needed)')
+    }
+
+    setRoomWebSocket(rws)
 
     return () => {
-      ws.close()
+      rws.close()
     }
   }
 
