@@ -102,33 +102,31 @@ const Room: React.FC = () => {
   }, [isSidebarOpen])
 
   useEffect(() => {
-    const xd = async () => {
-      setParticipantsVoted(
-        participants.map((participant) => ({
-          ...participant,
-          vote: null,
-        })),
-      )
+    console.log('participants', participants)
+    setParticipantsVoted(
+      participants.map((participant) => ({
+        ...participant,
+        vote: null,
+      })),
+    )
 
-      if (activeStory?.id != null) {
-        await api.get(`/votes/${activeStory.id}/`).then((response) => {
-          setParticipantsVoted((prevParticipants) =>
-            prevParticipants.map((participant) => {
-              const vote = response.data.find(
-                (vote: ApiVote) => vote.user.username === participant.username,
-              )
-              return {
-                ...participant,
-                vote: vote ? vote.value : null,
-              }
-            }),
-          )
+    if (activeStory?.id != null) {
+      api.get(`/votes/${activeStory.id}/`).then((response) => {
+        setParticipantsVoted((prevParticipants) =>
+          prevParticipants.map((participant) => {
+            const vote = response.data.find(
+              (vote: ApiVote) => vote.user.username === participant.username,
+            )
+            return {
+              ...participant,
+              vote: vote ? vote.value : null,
+            }
+          }),
+        )
 
-          setHasAnyVotes(response.data.length > 0)
-        })
-      }
+        setHasAnyVotes(response.data.length > 0)
+      })
     }
-    xd()
   }, [activeStory?.id, participants])
 
   const fetchRoomData = async () => {
