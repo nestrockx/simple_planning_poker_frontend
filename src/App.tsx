@@ -1,5 +1,5 @@
-import React from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Route, Routes, useNavigate } from 'react-router-dom'
 import Room from './pages/Room'
 import Auth from './pages/Auth'
 import Home from './pages/Home'
@@ -11,6 +11,29 @@ import Guest from './pages/Guest'
 // import { IoLogoLinkedin } from "react-icons/io";
 
 const App: React.FC = () => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      const path = window.location.pathname
+      if (
+        path !== '/login/' &&
+        path !== '/login' &&
+        path !== '/guest/' &&
+        path !== '/guest'
+      ) {
+        sessionStorage.setItem('afterLoginRedirect', path)
+        navigate('/login/')
+      }
+    }
+
+    window.addEventListener('unauthorized', handleUnauthorized)
+
+    return () => {
+      window.removeEventListener('unauthorized', handleUnauthorized)
+    }
+  }, [navigate])
+
   return (
     <div
       className="relative min-h-screen bg-cover bg-center"
@@ -34,16 +57,16 @@ const App: React.FC = () => {
           <IoLogoLinkedin size={32} />
         </a>
       </header>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Auth />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/room/:roomCode" element={<Room />} />
-          <Route path="/start" element={<CreateJoinRoom />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/guest" element={<Guest />} />
-        </Routes>
-      </BrowserRouter>
+
+      <Routes>
+        <Route path="/login" element={<Auth />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/room/:roomCode" element={<Room />} />
+        <Route path="/start" element={<CreateJoinRoom />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/guest" element={<Guest />} />
+      </Routes>
+
       <footer className="absolute right-0 bottom-0 p-4 text-sm text-zinc-400">
         &copy; Paweł Kraszewski 2025
       </footer>

@@ -5,8 +5,11 @@ import ReturnHome from '../components/ReturnHome'
 import request from '../api/request'
 import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
 import '@fontsource/montserrat/600.css'
+import { useNavigate } from 'react-router-dom'
 
 const Guest: React.FC = () => {
+  const navigate = useNavigate()
+
   const [error, setError] = useState<string>('')
   const [nickname, setNickname] = useState<string>('')
   const [requesting, setRequesting] = useState<boolean>()
@@ -26,9 +29,9 @@ const Guest: React.FC = () => {
         localStorage.clear()
         // sessionStorage.clear()
         if (loginRedirect != null) {
-          window.location.href = loginRedirect
+          navigate(loginRedirect)
         } else {
-          window.location.href = '/start/'
+          navigate('/start/')
         }
       })
       .catch((error) => {
