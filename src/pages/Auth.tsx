@@ -10,12 +10,12 @@ import { IoIosCheckmarkCircle } from 'react-icons/io'
 import '@fontsource/montserrat/600.css'
 
 const Auth: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [nickname, setNickname] = useState('')
-  const [error, setError] = useState('')
   const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
+  const [username, setUsername] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [nickname, setNickname] = useState<string>('')
+  const [error, setError] = useState<string>('')
   const [registered, setRegistered] = useState<boolean>(false)
   const [requesting, setRequesting] = useState<boolean>(false)
 

@@ -24,22 +24,22 @@ const Room: React.FC = () => {
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
 
   const [summon, setSummon] = useState<string>('Summon')
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   const [stories, setStories] = useState<Story[]>([])
-  const [newStory, setNewStory] = useState('')
+  const [newStory, setNewStory] = useState<string>('')
   const [activeStory, setActiveStory] = useState<Story | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
-  const [error, setError] = useState('')
-  const [roomId, setRoomId] = useState(null)
-  const [roomName, setRoomName] = useState('')
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [revealVotes, setRevealVotes] = useState(false)
-  const [hasAnyVotes, setHasAnyVotes] = useState(false)
+  const [error, setError] = useState<string>('')
+  const [roomId, setRoomId] = useState<number | null>(null)
+  const [roomName, setRoomName] = useState<string>('')
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const [revealVotes, setRevealVotes] = useState<boolean>(false)
+  const [hasAnyVotes, setHasAnyVotes] = useState<boolean>(false)
   const [roomWebSocket, setRoomWebSocket] =
     useState<ReconnectingWebSocket | null>(null)
   const [voteType, setVoteType] = useState<string>('default')
-  const [linkCopied, setLinkCopied] = useState(false)
-  const [codeCopied, setCodeCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState<boolean>(false)
+  const [codeCopied, setCodeCopied] = useState<boolean>(false)
   const [participantsVoted, setParticipantsVoted] = useState<
     ParticipantVoted[]
   >([])
@@ -102,34 +102,37 @@ const Room: React.FC = () => {
   }, [isSidebarOpen])
 
   useEffect(() => {
-    setParticipantsVoted(
-      participants.map((participant) => ({
-        ...participant,
-        vote: null,
-      })),
-    )
+    const xd = async () => {
+      setParticipantsVoted(
+        participants.map((participant) => ({
+          ...participant,
+          vote: null,
+        })),
+      )
 
-    if (activeStory?.id != null) {
-      api.get(`/votes/${activeStory.id}/`).then((response) => {
-        setParticipantsVoted((prevParticipants) =>
-          prevParticipants.map((participant) => {
-            const vote = response.data.find(
-              (vote: ApiVote) => vote.user.username === participant.username,
-            )
-            return {
-              ...participant,
-              vote: vote ? vote.value : null,
-            }
-          }),
-        )
+      if (activeStory?.id != null) {
+        await api.get(`/votes/${activeStory.id}/`).then((response) => {
+          setParticipantsVoted((prevParticipants) =>
+            prevParticipants.map((participant) => {
+              const vote = response.data.find(
+                (vote: ApiVote) => vote.user.username === participant.username,
+              )
+              return {
+                ...participant,
+                vote: vote ? vote.value : null,
+              }
+            }),
+          )
 
-        setHasAnyVotes(response.data.length > 0)
-      })
+          setHasAnyVotes(response.data.length > 0)
+        })
+      }
     }
+    xd()
   }, [activeStory?.id, participants])
 
   const fetchRoomData = async () => {
-    api.get(`/rooms/${roomCode}/`).then((roomResponse) => {
+    await api.get(`/rooms/${roomCode}/`).then(async (roomResponse) => {
       setRoomId(roomResponse.data.id)
       setRoomName(roomResponse.data.name)
       setParticipants(
@@ -140,28 +143,30 @@ const Room: React.FC = () => {
 
       setVoteType(roomResponse.data.type)
 
-      api.get(`/stories/${roomResponse.data.id}/`).then((storiesResponse) => {
-        setStories(
-          storiesResponse.data.map(
-            (story: { id: number; title: string; is_revealed: string }) => ({
-              id: story.id,
-              title: story.title,
-              is_revealed: story.is_revealed,
-            }),
-          ),
-        )
+      await api
+        .get(`/stories/${roomResponse.data.id}/`)
+        .then((storiesResponse) => {
+          setStories(
+            storiesResponse.data.map(
+              (story: { id: number; title: string; is_revealed: string }) => ({
+                id: story.id,
+                title: story.title,
+                is_revealed: story.is_revealed,
+              }),
+            ),
+          )
 
-        if (sessionStorage.getItem('activeRoomCode') === roomCode) {
-          const activeStory = sessionStorage.getItem('activeStory')
-          if (activeStory === null) {
-            handleSetActiveStory(storiesResponse.data[0], false)
+          if (sessionStorage.getItem('activeRoomCode') === roomCode) {
+            const activeStory = sessionStorage.getItem('activeStory')
+            if (activeStory === null) {
+              handleSetActiveStory(storiesResponse.data[0], false)
+            } else {
+              handleSetActiveStory(JSON.parse(activeStory), false)
+            }
           } else {
-            handleSetActiveStory(JSON.parse(activeStory), false)
+            handleSetActiveStory(storiesResponse.data[0], false)
           }
-        } else {
-          handleSetActiveStory(storiesResponse.data[0], false)
-        }
-      })
+        })
     })
   }
 
@@ -347,7 +352,7 @@ const Room: React.FC = () => {
       title: storyInput,
     })
 
-    const newStoryItem = {
+    const newStoryItem: Story = {
       id: response.data.id,
       title: response.data.title,
       is_revealed: response.data.is_revealed,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaUser } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/api'
@@ -6,7 +6,7 @@ import request from '../api/request'
 
 const AccountDropdown: React.FC = () => {
   const navigate = useNavigate()
-  const [username, setUsername] = React.useState<string | null>(null)
+  const [username, setUsername] = useState<string | null>(null)
   // const [nickname, setNickname] = React.useState<string | null>(null);
 
   useEffect(() => {

@@ -8,13 +8,13 @@ import { CiEdit } from 'react-icons/ci'
 import '@fontsource/montserrat/400.css'
 
 const Account: React.FC = () => {
+  const navigate = useNavigate()
   const [username, setUsername] = useState<string | null>(null)
   const [nickname, setNickname] = useState<string | null>(null)
   const [editingNickname, setEditingNickname] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('username')
