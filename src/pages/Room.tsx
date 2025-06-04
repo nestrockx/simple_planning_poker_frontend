@@ -187,100 +187,100 @@ const Room: React.FC = () => {
     rws.onopen = () => {
       console.log('WebSocket connected')
       setWebsocketConnecting(false)
+    }
 
-      rws.onmessage = (event) => {
-        const data = JSON.parse(event.data)
+    rws.onmessage = (event) => {
+      const data = JSON.parse(event.data)
 
-        if (data.type === 'reveal_votes') {
-          if (activeStoryRef.current?.id !== data.reveal.story_id) {
-            return
+      if (data.type === 'reveal_votes') {
+        if (activeStoryRef.current?.id !== data.reveal.story_id) {
+          return
+        }
+        setRevealVotes(data.reveal.value)
+      } else if (data.type === 'reset_votes') {
+        if (activeStoryRef.current?.id !== data.reset.story_id) {
+          return
+        }
+
+        setParticipants((prevParticipants) =>
+          sortParticipantsByNickname(
+            prevParticipants.map((participant) => ({
+              ...participant,
+              vote: null,
+            })),
+          ),
+        )
+        setRevealVotes(false)
+      } else if (data.type === 'vote_update') {
+        if (activeStoryRef.current?.id !== data.vote.story_id) {
+          return
+        }
+
+        handleVoteUpdate(data.vote)
+      } else if (data.type === 'participant_add') {
+        console.log('participants.add', data.participants.id)
+        api.get(`/userinfo/${data.participants.id}/`).then((response) => {
+          const newParticipant: Participant = {
+            id: response.data.id,
+            username: response.data.username,
+            profile: {
+              nickname: response.data.profile.nickname,
+              moderator: response.data.profile.moderator,
+            },
           }
-          setRevealVotes(data.reveal.value)
-        } else if (data.type === 'reset_votes') {
-          if (activeStoryRef.current?.id !== data.reset.story_id) {
-            return
-          }
-
-          setParticipants((prevParticipants) =>
-            sortParticipantsByNickname(
-              prevParticipants.map((participant) => ({
-                ...participant,
-                vote: null,
-              })),
-            ),
-          )
-          setRevealVotes(false)
-        } else if (data.type === 'vote_update') {
-          if (activeStoryRef.current?.id !== data.vote.story_id) {
-            return
-          }
-
-          handleVoteUpdate(data.vote)
-        } else if (data.type === 'participant_add') {
-          console.log('participants.add', data.participants.id)
-          api.get(`/userinfo/${data.participants.id}/`).then((response) => {
-            const newParticipant: Participant = {
-              id: response.data.id,
-              username: response.data.username,
-              profile: {
-                nickname: response.data.profile.nickname,
-                moderator: response.data.profile.moderator,
-              },
-            }
-            setParticipants((prevParticipants) => {
-              const existingParticipant = prevParticipants.find(
-                (p) => p.id === newParticipant.id,
-              )
-              if (existingParticipant) {
-                return prevParticipants
-              } else {
-                return [...prevParticipants, newParticipant].sort((a, b) =>
-                  a.profile.nickname.localeCompare(b.profile.nickname),
-                )
-              }
-            })
-          })
-        } else if (data.type === 'participant_remove') {
           setParticipants((prevParticipants) => {
-            const updatedParticipants = prevParticipants.filter(
-              (p) => p.id !== data.participants.id,
+            const existingParticipant = prevParticipants.find(
+              (p) => p.id === newParticipant.id,
             )
-
-            return updatedParticipants
+            if (existingParticipant) {
+              return prevParticipants
+            } else {
+              return [...prevParticipants, newParticipant].sort((a, b) =>
+                a.profile.nickname.localeCompare(b.profile.nickname),
+              )
+            }
           })
-        } else if (data.type === 'add_story') {
+        })
+      } else if (data.type === 'participant_remove') {
+        setParticipants((prevParticipants) => {
+          const updatedParticipants = prevParticipants.filter(
+            (p) => p.id !== data.participants.id,
+          )
+
+          return updatedParticipants
+        })
+      } else if (data.type === 'add_story') {
+        const newStory: Story = {
+          id: data.story.id,
+          title: data.story.title,
+          is_revealed: data.story.is_revealed,
+        }
+        setStories((prevStories) => [...prevStories, newStory])
+      } else if (data.type === 'remove_story') {
+        setStories((prevStories) =>
+          prevStories.filter((story) => story.id !== data.story.id),
+        )
+        if (
+          activeStoryRef.current?.id === data.story.id &&
+          activeStoryRef.current?.id !== storiesRef.current[0].id
+        ) {
+          handleSetActiveStory(storiesRef.current[0], false)
+        } else if (activeStoryRef.current?.id === data.story.id) {
+          handleSetActiveStory(storiesRef.current[1], false)
+        }
+      } else if (data.type === 'summon') {
+        if (activeStoryRef.current?.id !== data.story.id) {
           const newStory: Story = {
             id: data.story.id,
             title: data.story.title,
             is_revealed: data.story.is_revealed,
           }
-          setStories((prevStories) => [...prevStories, newStory])
-        } else if (data.type === 'remove_story') {
-          setStories((prevStories) =>
-            prevStories.filter((story) => story.id !== data.story.id),
-          )
-          if (
-            activeStoryRef.current?.id === data.story.id &&
-            activeStoryRef.current?.id !== storiesRef.current[0].id
-          ) {
-            handleSetActiveStory(storiesRef.current[0], false)
-          } else if (activeStoryRef.current?.id === data.story.id) {
-            handleSetActiveStory(storiesRef.current[1], false)
-          }
-        } else if (data.type === 'summon') {
-          if (activeStoryRef.current?.id !== data.story.id) {
-            const newStory: Story = {
-              id: data.story.id,
-              title: data.story.title,
-              is_revealed: data.story.is_revealed,
-            }
-            handleSetActiveStory(newStory, true)
-          } else {
-            setSummon('Others joined')
-            setTimeout(() => {
-              setSummon('Summon')
-            }, 1000)
-          }
+          handleSetActiveStory(newStory, true)
+        } else {
+          setSummon('Others joined')
+          setTimeout(() => {
+            setSummon('Summon')
+          }, 1000)
         }
       }
     }
