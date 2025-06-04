@@ -218,6 +218,7 @@ const Room: React.FC = () => {
 
         handleVoteUpdate(data.vote)
       } else if (data.type === 'participant_add') {
+        console.log('participants.add', data.participants.id)
         api.get(`/userinfo/${data.participants.id}/`).then((response) => {
           const newParticipant: Participant = {
             id: response.data.id,
