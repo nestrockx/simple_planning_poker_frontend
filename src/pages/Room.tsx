@@ -14,7 +14,6 @@ import { IoCheckmarkCircle } from 'react-icons/io5'
 import api from '../api/api'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
-// import { UserMinimal } from '../models/UserMinimal'
 
 const Room: React.FC = () => {
   const { roomCode } = useParams<{ roomCode: string }>()
@@ -23,8 +22,9 @@ const Room: React.FC = () => {
   const activeStoryRef = useRef<Story | null>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
+  const currentUserRef = useRef<Participant>(null)
 
-  // const [currentUser, setCurrentUser] = useState<UserMinimal | null>(null)
+  const [currentUser, setCurrentUser] = useState<Participant | null>(null)
   const [summon, setSummon] = useState<string>('Summon')
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   const [stories, setStories] = useState<Story[]>([])
@@ -64,6 +64,10 @@ const Room: React.FC = () => {
   }
 
   useEffect(() => {
+    currentUserRef.current = currentUser
+  }, [currentUser])
+
+  useEffect(() => {
     storiesRef.current = stories
   }, [stories])
 
@@ -72,8 +76,12 @@ const Room: React.FC = () => {
   }, [activeStory])
 
   useEffect(() => {
-    fetchRoomData()
-    connectToRevealWebSocket()
+    const init = async () => {
+      setWebsocketConnecting(true)
+      await fetchRoomData()
+      connectToRevealWebSocket()
+    }
+    init()
   }, [])
 
   useEffect(() => {
@@ -132,14 +140,46 @@ const Room: React.FC = () => {
   }, [activeStory?.id, participants])
 
   const fetchRoomData = async () => {
+    await api.get('/userinfo/').then((response) => {
+      const mainUser: Participant = {
+        id: response.data.id,
+        username: response.data.username,
+        profile: {
+          nickname: response.data.profile.nickname,
+          moderator: response.data.profile.moderator,
+        },
+      }
+      setCurrentUser(mainUser)
+      setParticipants((prevParticipants) => {
+        const existingParticipant = prevParticipants.find(
+          (p) => p.id === mainUser.id,
+        )
+        if (existingParticipant) {
+          return prevParticipants
+        } else {
+          return [...prevParticipants, mainUser].sort((a, b) =>
+            a.profile.nickname.localeCompare(b.profile.nickname),
+          )
+        }
+      })
+    })
+
     await api.get(`/rooms/${roomCode}/`).then(async (roomResponse) => {
       setRoomId(roomResponse.data.id)
       setRoomName(roomResponse.data.name)
-      setParticipants(
-        [...roomResponse.data.participants].sort((a, b) =>
-          a.profile.nickname.localeCompare(b.profile.nickname),
-        ),
-      )
+      console.log('rooms participants:', roomResponse.data.participants)
+      setParticipants((prevParticipants) => {
+        const newParticipants = [...roomResponse.data.participants]
+        const existingIds = new Set(prevParticipants.map((p) => p.id))
+        const uniqueNewParticipants = newParticipants.filter(
+          (p) => !existingIds.has(p.id),
+        )
+        const updatedList = [
+          ...prevParticipants,
+          ...uniqueNewParticipants,
+        ].sort((a, b) => a.profile.nickname.localeCompare(b.profile.nickname))
+        return updatedList
+      })
 
       setVoteType(roomResponse.data.type)
 
@@ -172,8 +212,6 @@ const Room: React.FC = () => {
 
   const connectToRevealWebSocket = async () => {
     if (!roomCode) return
-
-    setWebsocketConnecting(true)
 
     const rws = new ReconnectingWebSocket(
       `wss://${window.location.host}/ws/reveal/${roomCode}/`,
@@ -220,6 +258,10 @@ const Room: React.FC = () => {
 
         handleVoteUpdate(data.vote)
       } else if (data.type === 'participant_add') {
+        if (currentUserRef.current?.id === data.participants.id) {
+          console.log('Adding same user')
+          return
+        }
         console.log('participants.add', data.participants.id)
         api.get(`/userinfo/${data.participants.id}/`).then((response) => {
           const newParticipant: Participant = {
@@ -244,6 +286,10 @@ const Room: React.FC = () => {
           })
         })
       } else if (data.type === 'participant_remove') {
+        if (currentUserRef.current?.id === data.participants.id) {
+          console.log('Removing same user')
+          return
+        }
         setParticipants((prevParticipants) => {
           const updatedParticipants = prevParticipants.filter(
             (p) => p.id !== data.participants.id,
@@ -292,6 +338,7 @@ const Room: React.FC = () => {
     }
 
     rws.onclose = () => {
+      setWebsocketConnecting(true)
       console.log('WebSocket closed (will attempt reconnect if needed)')
     }
 
