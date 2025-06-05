@@ -14,6 +14,7 @@ import { IoCheckmarkCircle } from 'react-icons/io5'
 import api from '../api/api'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
+// import { UserMinimal } from '../models/UserMinimal'
 
 const Room: React.FC = () => {
   const { roomCode } = useParams<{ roomCode: string }>()
@@ -23,6 +24,7 @@ const Room: React.FC = () => {
   const sidebarRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
 
+  // const [currentUser, setCurrentUser] = useState<UserMinimal | null>(null)
   const [summon, setSummon] = useState<string>('Summon')
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   const [stories, setStories] = useState<Story[]>([])
@@ -70,8 +72,8 @@ const Room: React.FC = () => {
   }, [activeStory])
 
   useEffect(() => {
-    connectToRevealWebSocket()
     fetchRoomData()
+    connectToRevealWebSocket()
   }, [])
 
   useEffect(() => {
