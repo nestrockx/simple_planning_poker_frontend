@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom'
 import { X } from 'lucide-react'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHomeOffset from '../components/ReturnHomeOffset'
-import { Story } from '../models/Story'
-import { Participant } from '../models/Participant'
-import { ParticipantVoted } from '../models/ParticipantVoted'
-import { ApiVote } from '../models/ApiVote'
-import { WebSocketVote } from '../models/WebSocketVote'
+import { Story } from '../types/Story'
+import { Participant } from '../types/Participant'
+import { ParticipantVoted } from '../types/ParticipantVoted'
+import { ApiVote } from '../types/ApiVote'
+import { WebSocketVote } from '../types/WebSocketVote'
 import { IoIosLink } from 'react-icons/io'
 import { FaRegCopy } from 'react-icons/fa'
 import { IoCheckmarkCircle } from 'react-icons/io5'
@@ -232,104 +232,116 @@ const Room: React.FC = () => {
     rws.onmessage = (event) => {
       const data = JSON.parse(event.data)
 
-      if (data.type === 'reveal_votes') {
-        if (activeStoryRef.current?.id !== data.reveal.story_id) {
-          return
-        }
-        setRevealVotes(data.reveal.value)
-      } else if (data.type === 'reset_votes') {
-        if (activeStoryRef.current?.id !== data.reset.story_id) {
-          return
-        }
-
-        setParticipants((prevParticipants) =>
-          sortParticipantsByNickname(
-            prevParticipants.map((participant) => ({
-              ...participant,
-              vote: null,
-            })),
-          ),
-        )
-        setRevealVotes(false)
-      } else if (data.type === 'vote_update') {
-        if (activeStoryRef.current?.id !== data.vote.story_id) {
-          return
-        }
-
-        handleVoteUpdate(data.vote)
-      } else if (data.type === 'participant_add') {
-        if (currentUserRef.current?.id === data.participants.id) {
-          console.log('Adding same user')
-          return
-        }
-        console.log('participants.add', data.participants.id)
-        api.get(`/userinfo/${data.participants.id}/`).then((response) => {
-          const newParticipant: Participant = {
-            id: response.data.id,
-            username: response.data.username,
-            profile: {
-              nickname: response.data.profile.nickname,
-              moderator: response.data.profile.moderator,
-            },
+      switch (data.type) {
+        case 'reveal_votes':
+          if (activeStoryRef.current?.id !== data.reveal.story_id) {
+            return
+          }
+          setRevealVotes(data.reveal.value)
+          break
+        case 'reset_votes':
+          if (activeStoryRef.current?.id !== data.reset.story_id) {
+            return
+          }
+          setParticipants((prevParticipants) =>
+            sortParticipantsByNickname(
+              prevParticipants.map((participant) => ({
+                ...participant,
+                vote: null,
+              })),
+            ),
+          )
+          setRevealVotes(false)
+          break
+        case 'vote_update':
+          if (activeStoryRef.current?.id !== data.vote.story_id) {
+            return
+          }
+          handleVoteUpdate(data.vote)
+          break
+        case 'participant_add':
+          if (currentUserRef.current?.id === data.participants.id) {
+            console.log('Adding same user')
+            return
+          }
+          console.log('participants.add', data.participants.id)
+          api.get(`/userinfo/${data.participants.id}/`).then((response) => {
+            const newParticipant: Participant = {
+              id: response.data.id,
+              username: response.data.username,
+              profile: {
+                nickname: response.data.profile.nickname,
+                moderator: response.data.profile.moderator,
+              },
+            }
+            setParticipants((prevParticipants) => {
+              const existingParticipant = prevParticipants.find(
+                (p) => p.id === newParticipant.id,
+              )
+              if (existingParticipant) {
+                return prevParticipants
+              } else {
+                return [...prevParticipants, newParticipant].sort((a, b) =>
+                  a.profile.nickname.localeCompare(b.profile.nickname),
+                )
+              }
+            })
+          })
+          break
+        case 'participant_remove':
+          if (currentUserRef.current?.id === data.participants.id) {
+            console.log('Removing same user')
+            return
           }
           setParticipants((prevParticipants) => {
-            const existingParticipant = prevParticipants.find(
-              (p) => p.id === newParticipant.id,
+            const updatedParticipants = prevParticipants.filter(
+              (p) => p.id !== data.participants.id,
             )
-            if (existingParticipant) {
-              return prevParticipants
-            } else {
-              return [...prevParticipants, newParticipant].sort((a, b) =>
-                a.profile.nickname.localeCompare(b.profile.nickname),
-              )
-            }
-          })
-        })
-      } else if (data.type === 'participant_remove') {
-        if (currentUserRef.current?.id === data.participants.id) {
-          console.log('Removing same user')
-          return
-        }
-        setParticipants((prevParticipants) => {
-          const updatedParticipants = prevParticipants.filter(
-            (p) => p.id !== data.participants.id,
-          )
 
-          return updatedParticipants
-        })
-      } else if (data.type === 'add_story') {
-        const newStory: Story = {
-          id: data.story.id,
-          title: data.story.title,
-          is_revealed: data.story.is_revealed,
-        }
-        setStories((prevStories) => [...prevStories, newStory])
-      } else if (data.type === 'remove_story') {
-        setStories((prevStories) =>
-          prevStories.filter((story) => story.id !== data.story.id),
-        )
-        if (
-          activeStoryRef.current?.id === data.story.id &&
-          activeStoryRef.current?.id !== storiesRef.current[0].id
-        ) {
-          handleSetActiveStory(storiesRef.current[0], false)
-        } else if (activeStoryRef.current?.id === data.story.id) {
-          handleSetActiveStory(storiesRef.current[1], false)
-        }
-      } else if (data.type === 'summon') {
-        if (activeStoryRef.current?.id !== data.story.id) {
-          const newStory: Story = {
-            id: data.story.id,
-            title: data.story.title,
-            is_revealed: data.story.is_revealed,
+            return updatedParticipants
+          })
+          break
+        case 'add_story':
+          setStories((prevStories) => [
+            ...prevStories,
+            {
+              id: data.story.id,
+              title: data.story.title,
+              is_revealed: data.story.is_revealed,
+            },
+          ])
+          break
+        case 'remove_story':
+          setStories((prevStories) =>
+            prevStories.filter((story) => story.id !== data.story.id),
+          )
+          if (
+            activeStoryRef.current?.id === data.story.id &&
+            activeStoryRef.current?.id !== storiesRef.current[0].id
+          ) {
+            handleSetActiveStory(storiesRef.current[0], false)
+          } else if (activeStoryRef.current?.id === data.story.id) {
+            handleSetActiveStory(storiesRef.current[1], false)
           }
-          handleSetActiveStory(newStory, true)
-        } else {
-          setSummon('Others joined')
-          setTimeout(() => {
-            setSummon('Summon')
-          }, 1000)
-        }
+          break
+        case 'summon':
+          if (activeStoryRef.current?.id !== data.story.id) {
+            const newStory: Story = {
+              id: data.story.id,
+              title: data.story.title,
+              is_revealed: data.story.is_revealed,
+            }
+            handleSetActiveStory(newStory, true)
+          } else {
+            setSummon('Others joined')
+            setTimeout(() => {
+              setSummon('Summon')
+            }, 1000)
+          }
+          break
+        default:
+          console.warn('Unknown WebSocket message type:', data.type)
+          break
       }
     }
 
