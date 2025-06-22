@@ -1,13 +1,45 @@
+import React, { useState } from 'react'
 import { FiInfo } from 'react-icons/fi'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
+import request from '../api/request'
 import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
 import '@fontsource/montserrat/600.css'
-import { useGuestAuth } from '../hooks/useGuestAuth'
+import { useNavigate } from 'react-router-dom'
 
 const Guest: React.FC = () => {
-  const { error, requesting, nickname, setNickname, handleAuth } =
-    useGuestAuth()
+  const navigate = useNavigate()
+
+  const [error, setError] = useState<string>('')
+  const [nickname, setNickname] = useState<string>('')
+  const [requesting, setRequesting] = useState<boolean>()
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setRequesting(true)
+
+    request
+      .post('/auth/guestlogin/', {
+        nickname,
+      })
+      .then(() => {
+        const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
+
+        localStorage.clear()
+        // sessionStorage.clear()
+        if (loginRedirect != null) {
+          navigate(loginRedirect)
+        } else {
+          navigate('/start/')
+        }
+      })
+      .catch((error) => {
+        console.error('Error during guest login:', error)
+        setError('Guest login failed.')
+        setRequesting(false)
+      })
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center">

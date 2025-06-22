@@ -5,8 +5,8 @@ import '@fontsource/montserrat/600.css'
 import ReturnHome from '../components/ReturnHome'
 
 const Home: React.FC = () => {
-  const navigate = useNavigate()
   const soundRef = useRef<HTMLAudioElement | null>(null)
+  const navigate = useNavigate()
 
   const handleStart = async () => {
     navigate(`/start/`)
