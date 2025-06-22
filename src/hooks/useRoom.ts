@@ -7,6 +7,7 @@ import { Participant } from '../types/Participant'
 import api from '../api/api'
 import { ApiVote } from '../types/ApiVote'
 import { WebSocketVote } from '../types/WebSocketVote'
+import { useQuery } from '@tanstack/react-query'
 
 export const useRoom = () => {
   const { roomCode } = useParams<{ roomCode: string }>()
@@ -43,6 +44,23 @@ export const useRoom = () => {
   const [roomWebSocket, setRoomWebSocket] =
     useState<ReconnectingWebSocket | null>(null)
 
+  const query = useQuery({
+    queryKey: ['roomData', roomCode!],
+    queryFn: async () => {
+      setWebsocketConnecting(true)
+      await fetchRoomData()
+      return true
+    },
+    enabled: !!roomCode,
+    refetchOnWindowFocus: false,
+  })
+
+  useEffect(() => {
+    if (query.isSuccess) {
+      connectToRoomWebSocket()
+    }
+  }, [query.isSuccess])
+
   const getVoteOptions = () => {
     switch (voteType) {
       case 'fibonacci':
@@ -71,12 +89,6 @@ export const useRoom = () => {
   useEffect(() => {
     const init = async () => {
       setWebsocketConnecting(true)
-      try {
-        await fetchRoomData()
-      } catch (error) {
-        console.log(error)
-      }
-      connectToRoomWebSocket()
     }
     init()
   }, [])
@@ -137,74 +149,63 @@ export const useRoom = () => {
   }, [activeStory?.id, participants])
 
   const fetchRoomData = async () => {
-    await api.get('/userinfo/').then((response) => {
-      const mainUser: Participant = {
-        id: response.data.id,
-        username: response.data.username,
-        profile: {
-          nickname: response.data.profile.nickname,
-          moderator: response.data.profile.moderator,
-        },
-      }
-      setCurrentUser(mainUser)
-      setParticipants((prevParticipants) => {
-        const existingParticipant = prevParticipants.find(
-          (p) => p.id === mainUser.id,
-        )
-        if (existingParticipant) {
-          return prevParticipants
-        } else {
-          return [...prevParticipants, mainUser].sort((a, b) =>
+    const userResponse = await api.get('/userinfo/')
+    const mainUser: Participant = {
+      id: userResponse.data.id,
+      username: userResponse.data.username,
+      profile: {
+        nickname: userResponse.data.profile.nickname,
+        moderator: userResponse.data.profile.moderator,
+      },
+    }
+
+    setCurrentUser(mainUser)
+    setParticipants((prev) => {
+      const exists = prev.find((p) => p.id === mainUser.id)
+      return exists
+        ? prev
+        : [...prev, mainUser].sort((a, b) =>
             a.profile.nickname.localeCompare(b.profile.nickname),
           )
-        }
-      })
     })
 
-    await api.get(`/rooms/${roomCode}/`).then(async (roomResponse) => {
-      setRoomId(roomResponse.data.id)
-      setRoomName(roomResponse.data.name)
-      console.log('rooms participants:', roomResponse.data.participants)
-      setParticipants((prevParticipants) => {
-        const newParticipants = [...roomResponse.data.participants]
-        const existingIds = new Set(prevParticipants.map((p) => p.id))
-        const uniqueNewParticipants = newParticipants.filter(
-          (p) => !existingIds.has(p.id),
-        )
-        const updatedList = [
-          ...prevParticipants,
-          ...uniqueNewParticipants,
-        ].sort((a, b) => a.profile.nickname.localeCompare(b.profile.nickname))
-        return updatedList
-      })
+    const roomResponse = await api.get(`/rooms/${roomCode}/`)
+    setRoomId(roomResponse.data.id)
+    setRoomName(roomResponse.data.name)
 
-      setVoteType(roomResponse.data.type)
-
-      await api
-        .get(`/stories/${roomResponse.data.id}/`)
-        .then((storiesResponse) => {
-          setStories(
-            storiesResponse.data.map(
-              (story: { id: number; title: string; is_revealed: string }) => ({
-                id: story.id,
-                title: story.title,
-                is_revealed: story.is_revealed,
-              }),
-            ),
-          )
-
-          if (sessionStorage.getItem('activeRoomCode') === roomCode) {
-            const activeStory = sessionStorage.getItem('activeStory')
-            if (activeStory === null) {
-              handleSetActiveStory(storiesResponse.data[0], false)
-            } else {
-              handleSetActiveStory(JSON.parse(activeStory), false)
-            }
-          } else {
-            handleSetActiveStory(storiesResponse.data[0], false)
-          }
-        })
+    const newParticipants = roomResponse.data.participants
+    setParticipants((prev) => {
+      const existingIds = new Set(prev.map((p) => p.id))
+      const uniqueNew = newParticipants.filter(
+        (p: { id: number }) => !existingIds.has(p.id),
+      )
+      return [...prev, ...uniqueNew].sort((a, b) =>
+        a.profile.nickname.localeCompare(b.profile.nickname),
+      )
     })
+
+    setVoteType(roomResponse.data.type)
+
+    const storiesResponse = await api.get(`/stories/${roomResponse.data.id}/`)
+    const stories = storiesResponse.data.map((story: Story) => ({
+      id: story.id,
+      title: story.title,
+      is_revealed: story.is_revealed,
+    }))
+    setStories(stories)
+
+    const storedRoom = sessionStorage.getItem('activeRoomCode')
+    if (storedRoom === roomCode) {
+      const activeStory = sessionStorage.getItem('activeStory')
+      handleSetActiveStory(
+        activeStory ? JSON.parse(activeStory) : stories[0],
+        false,
+      )
+    } else {
+      handleSetActiveStory(stories[0], false)
+    }
+
+    return null
   }
 
   const connectToRoomWebSocket = async () => {
