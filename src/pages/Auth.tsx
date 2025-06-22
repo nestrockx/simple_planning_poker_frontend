@@ -1,125 +1,29 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { FiInfo } from 'react-icons/fi'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
-import request from '../api/request'
 import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
 import { CgClose } from 'react-icons/cg'
 import { IoIosCheckmarkCircle } from 'react-icons/io'
 import '@fontsource/montserrat/600.css'
+import { useAuth } from '../hooks/useAuth'
 
 const Auth: React.FC = () => {
-  const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
-  const [username, setUsername] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-  const [nickname, setNickname] = useState<string>('')
-  const [error, setError] = useState<string>('')
-  const [registered, setRegistered] = useState<boolean>(false)
-  const [requesting, setRequesting] = useState<boolean>(false)
-
-  const getPasswordValidationStatus = (password: string) => {
-    return {
-      length: password.length >= 7 && password.length <= 128,
-      uppercase: /[A-Z]/.test(password),
-      lowercase: /[a-z]/.test(password),
-      number: /[0-9]/.test(password),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    }
-  }
-  const isPasswordValid = (password: string) => {
-    const checks = getPasswordValidationStatus(password)
-    if (!checks.length) return false
-    if (!checks.uppercase) return false
-    if (!checks.lowercase) return false
-    if (!checks.number) return false
-    if (!checks.special) return false
-    return true
-  }
-
-  const passwordValidation = getPasswordValidationStatus(password)
-
-  useEffect(() => {
-    setError('')
-    setUsername('')
-    setPassword('')
-    setNickname('')
-  }, [activeTab])
-
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    if (username.length < 4) {
-      setError('Username must be at least 4 characters long.')
-      return
-    }
-    if (activeTab === 'register' && !isPasswordValid(password)) {
-      setError('Invalid password')
-      return
-    }
-    if (activeTab === 'login' && password.length < 7) {
-      setError('Password must be at least 7 characters long.')
-      return
-    }
-    if (activeTab === 'login' && password.length > 128) {
-      setError('Password cannot be longer than 128 characters.')
-      return
-    }
-
-    setRequesting(true)
-
-    try {
-      if (activeTab === 'login') {
-        await request.post('/auth/login/', {
-          username,
-          password,
-        })
-      } else {
-        await request.post('/auth/register/', {
-          username,
-          nickname,
-          password,
-        })
-      }
-
-      const loginRedirect = sessionStorage.getItem('afterLoginRedirect')
-      localStorage.clear()
-      sessionStorage.clear()
-
-      if (activeTab === 'register') {
-        setRequesting(false)
-        setRegistered(true)
-        setTimeout(() => {
-          if (loginRedirect != null) {
-            navigate(loginRedirect)
-          } else {
-            navigate('/start/')
-          }
-        }, 2000)
-      } else {
-        setRequesting(false)
-        if (loginRedirect != null) {
-          navigate(loginRedirect)
-        } else {
-          navigate('/start/')
-        }
-      }
-    } catch (err) {
-      console.error(err)
-      setRequesting(false)
-      if (activeTab === 'login') {
-        setError('Invalid username or password.')
-      } else {
-        setError('User name already exists.')
-      }
-    }
-  }
-
-  const handleGuestLogin = async () => {
-    navigate('/guest/')
-  }
+  const {
+    activeTab,
+    setActiveTab,
+    registered,
+    requesting,
+    username,
+    setUsername,
+    password,
+    setPassword,
+    nickname,
+    setNickname,
+    error,
+    passwordValidation,
+    handleAuth,
+    handleGuestLogin,
+  } = useAuth()
 
   return (
     <div className="flex min-h-screen items-center justify-center">

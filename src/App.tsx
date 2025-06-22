@@ -3,7 +3,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom'
 import Room from './pages/Room'
 import Auth from './pages/Auth'
 import Home from './pages/Home'
-import CreateJoinRoom from './pages/CreateJoinRoom'
+import RoomJoinCreate from './pages/RoomJoinCreate'
 import { FaGithubAlt } from 'react-icons/fa'
 import Account from './pages/Account'
 import { IoLogoLinkedin } from 'react-icons/io'
@@ -62,7 +62,7 @@ const App: React.FC = () => {
         <Route path="/login" element={<Auth />} />
         <Route path="/" element={<Home />} />
         <Route path="/room/:roomCode" element={<Room />} />
-        <Route path="/start" element={<CreateJoinRoom />} />
+        <Route path="/start" element={<RoomJoinCreate />} />
         <Route path="/account" element={<Account />} />
         <Route path="/guest" element={<Guest />} />
       </Routes>
