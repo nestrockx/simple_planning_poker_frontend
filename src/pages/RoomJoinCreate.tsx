@@ -1,102 +1,31 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import api from '../api/api'
 import AccountDropdown from '../components/AccountDropdown'
 import ReturnHome from '../components/ReturnHome'
 import LoadingSpinnerEmerald from '../components/LoadingSpinnerEmerald'
 import LoadingSpinnerCyan from '../components/LoadingSpinnerCyan'
+import { useRoomJoinCreate } from '../hooks/useRoomJoinCreate'
 import '@fontsource/montserrat/600.css'
 
-const CreateJoinRoom: React.FC = () => {
-  const [roomName, setRoomName] = useState<string>('')
-  const [deckType, setDeckType] = useState<
-    'default' | 'fibonacci' | 'tshirts' | 'powers'
-  >('default')
-  const [createError, setCreateError] = useState<string>('')
-  const [joinRoomCode, setJoinRoomCode] = useState<string>('')
-  const [joinError, setJoinError] = useState<string>('')
-  const [createRequesting, setCreateRequesting] = useState<boolean>(false)
-  const [joinRequesting, setJoinRequesting] = useState<boolean>(false)
-
-  const navigate = useNavigate()
+const RoomJoinCreate: React.FC = () => {
+  const {
+    roomName,
+    setRoomName,
+    joinRoomCode,
+    setJoinRoomCode,
+    deckType,
+    setDeckType,
+    joinError,
+    createError,
+    joinRequesting,
+    createRequesting,
+    handleCreateRoom,
+    handleJoinRoom,
+  } = useRoomJoinCreate()
 
   useEffect(() => {
     api.get('/empty/')
   }, [])
-
-  const handleCreateRoom = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setCreateRequesting(true)
-
-    if (!roomName.trim()) {
-      setCreateError('Room name is required')
-      setCreateRequesting(false)
-      return
-    }
-
-    setCreateError('')
-
-    const roomPayload = {
-      name: roomName,
-      type: deckType,
-    }
-
-    try {
-      const response = await api.post('/rooms/', roomPayload)
-      if (response.status !== 201) {
-        setCreateError('Failed to create room')
-        setCreateRequesting(false)
-        return
-      }
-
-      await api.post('/stories/', { room_id: response.data.id })
-
-      const roomCode = response.data.code
-
-      await api.post(`/rooms/${roomCode}/join/`, {})
-
-      navigate(`/room/${roomCode}`)
-    } catch (error) {
-      console.log(error)
-      setCreateError('Failed to create room')
-      setCreateRequesting(false)
-      return
-    }
-  }
-
-  const handleJoinRoom = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setJoinRequesting(true)
-
-    if (!joinRoomCode.trim()) {
-      setJoinError('Room code is required')
-      setJoinRequesting(false)
-      return
-    }
-
-    if (joinRoomCode.length !== 6) {
-      setJoinError('Room code must be 6 characters long')
-      setJoinRequesting(false)
-      return
-    }
-
-    setJoinError('')
-
-    try {
-      const response = await api.post(`/rooms/${joinRoomCode}/join/`, {})
-      if (response.status !== 200) {
-        setJoinError("Room doesn't exist")
-        setJoinRequesting(false)
-        return
-      }
-      navigate(`/room/${joinRoomCode}`)
-    } catch (error) {
-      console.log(error)
-      setJoinError("Room doesn't exist")
-      setJoinRequesting(false)
-      return
-    }
-  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4">
@@ -230,4 +159,4 @@ const CreateJoinRoom: React.FC = () => {
   )
 }
 
-export default CreateJoinRoom
+export default RoomJoinCreate
