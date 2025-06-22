@@ -246,7 +246,7 @@ export const useRoom = () => {
     if (!roomCode) return
 
     const rws = new ReconnectingWebSocket(
-      `wss://${window.location.host}/ws/reveal/${roomCode}/`,
+      `ws://localhost:8000/ws/reveal/${roomCode}/`,
       [],
       {
         WebSocket: WebSocket,
