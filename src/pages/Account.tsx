@@ -20,7 +20,7 @@ const Account: React.FC = () => {
   } = useAccount()
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center">
+    <div className="mx-4 flex min-h-screen flex-col items-center justify-center">
       <ReturnHome />
       <AccountDropdown />
 
