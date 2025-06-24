@@ -130,21 +130,26 @@ export const useRoom = () => {
     )
 
     if (activeStory?.id != null) {
-      api.get(`/votes/${activeStory.id}/`).then((response) => {
-        setParticipantsVoted((prevParticipants) =>
-          prevParticipants.map((participant) => {
-            const vote = response.data.find(
-              (vote: ApiVote) => vote.user.username === participant.username,
-            )
-            return {
-              ...participant,
-              vote: vote ? vote.value : null,
-            }
-          }),
-        )
+      api
+        .get(`/votes/${activeStory.id}/`)
+        .then((response) => {
+          setParticipantsVoted((prevParticipants) =>
+            prevParticipants.map((participant) => {
+              const vote = response.data.find(
+                (vote: ApiVote) => vote.user.username === participant.username,
+              )
+              return {
+                ...participant,
+                vote: vote ? vote.value : null,
+              }
+            }),
+          )
 
-        setHasAnyVotes(response.data.length > 0)
-      })
+          setHasAnyVotes(response.data.length > 0)
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     }
   }, [activeStory?.id, participants])
 
@@ -263,28 +268,33 @@ export const useRoom = () => {
             return
           }
           console.log('participants.add', data.participants.id)
-          api.get(`/userinfo/${data.participants.id}/`).then((response) => {
-            const newParticipant: Participant = {
-              id: response.data.id,
-              username: response.data.username,
-              profile: {
-                nickname: response.data.profile.nickname,
-                moderator: response.data.profile.moderator,
-              },
-            }
-            setParticipants((prevParticipants) => {
-              const existingParticipant = prevParticipants.find(
-                (p) => p.id === newParticipant.id,
-              )
-              if (existingParticipant) {
-                return prevParticipants
-              } else {
-                return [...prevParticipants, newParticipant].sort((a, b) =>
-                  a.profile.nickname.localeCompare(b.profile.nickname),
-                )
+          api
+            .get(`/userinfo/${data.participants.id}/`)
+            .then((response) => {
+              const newParticipant: Participant = {
+                id: response.data.id,
+                username: response.data.username,
+                profile: {
+                  nickname: response.data.profile.nickname,
+                  moderator: response.data.profile.moderator,
+                },
               }
+              setParticipants((prevParticipants) => {
+                const existingParticipant = prevParticipants.find(
+                  (p) => p.id === newParticipant.id,
+                )
+                if (existingParticipant) {
+                  return prevParticipants
+                } else {
+                  return [...prevParticipants, newParticipant].sort((a, b) =>
+                    a.profile.nickname.localeCompare(b.profile.nickname),
+                  )
+                }
+              })
             })
-          })
+            .catch((err) => {
+              console.log(err)
+            })
           break
         case 'participant_remove':
           if (currentUserRef.current?.id === data.participants.id) {
@@ -370,25 +380,36 @@ export const useRoom = () => {
     sessionStorage.setItem('activeStory', JSON.stringify(story))
 
     if (change) {
-      await api.get(`/votes/${story.id}/`).then((response) => {
-        setParticipants((prevParticipants) =>
-          sortParticipantsByNickname(
-            prevParticipants.map((participant) => {
-              const vote = response.data.find(
-                (vote: ApiVote) => vote.user.username === participant.username,
-              )
-              return {
-                ...participant,
-                vote: vote ? vote.value : null,
-              }
-            }),
-          ),
-        )
-      })
+      await api
+        .get(`/votes/${story.id}/`)
+        .then((response) => {
+          setParticipants((prevParticipants) =>
+            sortParticipantsByNickname(
+              prevParticipants.map((participant) => {
+                const vote = response.data.find(
+                  (vote: ApiVote) =>
+                    vote.user.username === participant.username,
+                )
+                return {
+                  ...participant,
+                  vote: vote ? vote.value : null,
+                }
+              }),
+            ),
+          )
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     }
-    await api.get(`/stories/${story.id}/getstory`).then((response) => {
-      setRevealVotes(response.data.is_revealed)
-    })
+    await api
+      .get(`/stories/${story.id}/getstory`)
+      .then((response) => {
+        setRevealVotes(response.data.is_revealed)
+      })
+      .catch((err) => {
+        console.error(err)
+      })
     // setRevealVotes(story.is_revealed)
 
     sessionStorage.setItem('activeRoomCode', roomCode || '')
@@ -445,7 +466,12 @@ export const useRoom = () => {
       prevStories.filter((story) => story.id !== storyId),
     )
 
-    await api.delete(`/stories/${storyId}/delete/`).then(() => {})
+    await api
+      .delete(`/stories/${storyId}/delete/`)
+      .then(() => {})
+      .catch((err) => {
+        console.error(err)
+      })
     roomWebSocket?.send(
       JSON.stringify({
         action: 'remove_story',
@@ -526,16 +552,21 @@ export const useRoom = () => {
   const handleResetVotes = async () => {
     if (roomWebSocket?.readyState === WebSocket.OPEN) {
       if (activeStory?.id != null) {
-        await api.delete(`/votes/${activeStory?.id}/delete/`).then(() => {
-          setParticipants((prevParticipants) =>
-            sortParticipantsByNickname(
-              prevParticipants.map((participant) => ({
-                ...participant,
-                vote: null,
-              })),
-            ),
-          )
-        })
+        await api
+          .delete(`/votes/${activeStory?.id}/delete/`)
+          .then(() => {
+            setParticipants((prevParticipants) =>
+              sortParticipantsByNickname(
+                prevParticipants.map((participant) => ({
+                  ...participant,
+                  vote: null,
+                })),
+              ),
+            )
+          })
+          .catch((err) => {
+            console.error(err)
+          })
 
         roomWebSocket?.send(
           JSON.stringify({

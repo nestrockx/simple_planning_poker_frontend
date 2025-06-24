@@ -48,6 +48,10 @@
   background: transparent;
 }
 
+.dark .glow-on-hover:active:after {
+  background: transparent;
+}
+
 .glow-on-hover:hover:before {
   transform: scale(1.05, 1.2);
 }
@@ -58,10 +62,17 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  background: #000;
   left: 0;
   top: 0;
   border-radius: 10px;
+}
+
+.glow-on-hover:after {
+  background: #fafafa;
+}
+
+.dark .glow-on-hover:after {
+  background: #000;
 }
 
 @keyframes glowing {

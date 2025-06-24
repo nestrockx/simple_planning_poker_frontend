@@ -35,16 +35,13 @@ const App: React.FC = () => {
   }, [navigate])
 
   return (
-    <div
-      className="relative min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: 'url(/images/background3.jpg)' }}
-    >
+    <div className="relative min-h-screen bg-white bg-[url()] bg-cover bg-center dark:bg-[url(/images/background3.jpg)]">
       <header>
         <a
           href="https://github.com/nestrockx"
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-4 right-4 text-white transition hover:text-zinc-500"
+          className="absolute top-4 right-4 text-black transition hover:text-zinc-500 dark:text-white"
         >
           <FaGithubAlt size={32} />
         </a>
@@ -52,7 +49,7 @@ const App: React.FC = () => {
           href="https://www.linkedin.com/in/pawe%C5%82-kraszewski-87b872162/"
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-4 right-15 text-white transition hover:text-zinc-500"
+          className="absolute top-4 right-15 text-black transition hover:text-zinc-500 dark:text-white"
         >
           <IoLogoLinkedin size={32} />
         </a>

@@ -6,6 +6,7 @@ import { CgClose } from 'react-icons/cg'
 import { IoIosCheckmarkCircle } from 'react-icons/io'
 import '@fontsource/montserrat/600.css'
 import { useAuth } from '../hooks/useAuth'
+import DarkModeButton from '../components/DarkModeButton'
 
 const Auth: React.FC = () => {
   const {
@@ -29,12 +30,13 @@ const Auth: React.FC = () => {
     <div className="flex min-h-screen items-center justify-center">
       <AccountDropdown />
       <ReturnHome />
+      <DarkModeButton />
 
-      <div className="mx-4 mt-25 mb-15 w-full max-w-sm rounded-xl bg-zinc-950/70 p-6 shadow-lg backdrop-blur-md">
+      <div className="mx-4 mt-25 mb-15 w-full max-w-sm rounded-xl p-6 shadow-xl outline-1 backdrop-blur-md dark:bg-zinc-950/70 dark:outline-0">
         {/* Tab buttons with animated indicator */}
-        <div className="relative mb-6 flex overflow-hidden rounded bg-zinc-800">
+        <div className="relative mb-6 flex overflow-hidden rounded outline-1 dark:bg-zinc-800 dark:outline-0">
           <div
-            className={`absolute top-0 left-0 h-full w-1/2 rounded bg-emerald-700 transition-transform duration-300 ${
+            className={`absolute top-0 left-0 h-full w-1/2 rounded bg-emerald-400 transition-transform duration-300 dark:bg-emerald-700 ${
               activeTab === 'register' ? 'translate-x-full' : 'translate-x-0'
             }`}
             style={{ zIndex: 0 }}
@@ -42,7 +44,9 @@ const Auth: React.FC = () => {
 
           <button
             className={`z-10 w-1/2 py-2 font-medium transition-colors duration-300 ${
-              activeTab === 'login' ? 'text-white' : 'text-gray-400'
+              activeTab === 'login'
+                ? 'text-black dark:text-white'
+                : 'text-gray-400'
             }`}
             onClick={() => setActiveTab('login')}
           >
@@ -50,7 +54,9 @@ const Auth: React.FC = () => {
           </button>
           <button
             className={`z-10 w-1/2 py-2 font-medium transition-colors duration-300 ${
-              activeTab === 'register' ? 'text-white' : 'text-gray-400'
+              activeTab === 'register'
+                ? 'text-black dark:text-white'
+                : 'text-gray-400'
             }`}
             onClick={() => setActiveTab('register')}
           >
@@ -60,7 +66,7 @@ const Auth: React.FC = () => {
 
         {/* Auth Form */}
         <form onSubmit={handleAuth}>
-          <h2 className="montserrat mb-4 text-2xl font-bold text-white capitalize">
+          <h2 className="montserrat mb-4 text-2xl font-bold text-black capitalize dark:text-white">
             {activeTab}
           </h2>
 
@@ -69,10 +75,10 @@ const Auth: React.FC = () => {
           )}
 
           <div className="mb-4">
-            <label className="mb-1 flex items-center gap-1 text-white">
+            <label className="mb-1 flex items-center gap-1 text-black dark:text-white">
               Username
               <div className="group relative">
-                <FiInfo className="cursor-pointer text-emerald-400" />
+                <FiInfo className="cursor-pointer text-emerald-800 dark:text-emerald-400" />
                 <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 w-56 -translate-x-1/2 rounded bg-zinc-800 p-2 text-sm text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
                   Your <b>unique</b> name for login. Must be at least 3
                   characters.
@@ -80,7 +86,7 @@ const Auth: React.FC = () => {
               </div>
             </label>
             <input
-              className="w-full rounded border bg-zinc-700 px-3 py-2 text-white"
+              className="w-full rounded border px-3 py-2 text-black dark:bg-zinc-700 dark:text-white"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -90,10 +96,10 @@ const Auth: React.FC = () => {
 
           {activeTab === 'register' && (
             <div className="mb-4">
-              <label className="mb-1 flex items-center gap-1 text-white">
+              <label className="mb-1 flex items-center gap-1 text-black dark:text-white">
                 Displayname
                 <div className="group relative">
-                  <FiInfo className="cursor-pointer text-emerald-400" />
+                  <FiInfo className="cursor-pointer text-emerald-800 dark:text-emerald-400" />
                   <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 w-56 -translate-x-1/2 rounded bg-zinc-800 p-2 text-sm text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
                     This is how you will apear to others. You can change it
                     later.
@@ -101,7 +107,7 @@ const Auth: React.FC = () => {
                 </div>
               </label>
               <input
-                className="w-full rounded border bg-zinc-700 px-3 py-2 text-white"
+                className="w-full rounded border px-3 py-2 text-black dark:bg-zinc-700 dark:text-white"
                 type="text"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
@@ -111,9 +117,11 @@ const Auth: React.FC = () => {
           )}
 
           <div className="mb-4">
-            <label className="mb-1 block text-white">Password</label>
+            <label className="mb-1 block text-black dark:text-white">
+              Password
+            </label>
             <input
-              className="w-full rounded border bg-zinc-700 px-3 py-2 text-white"
+              className="w-full rounded border px-3 py-2 text-black dark:bg-zinc-700 dark:text-white"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -125,7 +133,9 @@ const Auth: React.FC = () => {
             <ul className="mt-2 mb-4 space-y-1 text-sm text-white">
               <li
                 className={`flex gap-2 ${
-                  passwordValidation.length ? 'text-green-400' : 'text-zinc-400'
+                  passwordValidation.length
+                    ? 'text-green-700 dark:text-green-400'
+                    : 'text-zinc-600 dark:text-zinc-400'
                 }`}
               >
                 {passwordValidation.length ? (
@@ -138,8 +148,8 @@ const Auth: React.FC = () => {
               <li
                 className={`flex gap-2 ${
                   passwordValidation.uppercase
-                    ? 'text-green-400'
-                    : 'text-zinc-400'
+                    ? 'text-green-700 dark:text-green-400'
+                    : 'text-zinc-600 dark:text-zinc-400'
                 }`}
               >
                 {passwordValidation.uppercase ? (
@@ -152,8 +162,8 @@ const Auth: React.FC = () => {
               <li
                 className={`flex gap-2 ${
                   passwordValidation.lowercase
-                    ? 'text-green-400'
-                    : 'text-zinc-400'
+                    ? 'text-green-700 dark:text-green-400'
+                    : 'text-zinc-600 dark:text-zinc-400'
                 }`}
               >
                 {passwordValidation.lowercase ? (
@@ -165,7 +175,9 @@ const Auth: React.FC = () => {
               </li>
               <li
                 className={`flex gap-2 ${
-                  passwordValidation.number ? 'text-green-400' : 'text-zinc-400'
+                  passwordValidation.number
+                    ? 'text-green-700 dark:text-green-400'
+                    : 'text-zinc-600 dark:text-zinc-400'
                 }`}
               >
                 {passwordValidation.number ? (
@@ -178,8 +190,8 @@ const Auth: React.FC = () => {
               <li
                 className={`flex gap-2 ${
                   passwordValidation.special
-                    ? 'text-green-400'
-                    : 'text-zinc-400'
+                    ? 'text-green-700 dark:text-green-400'
+                    : 'text-zinc-600 dark:text-zinc-400'
                 }`}
               >
                 {passwordValidation.special ? (
@@ -195,14 +207,14 @@ const Auth: React.FC = () => {
           {!registered && !requesting && (
             <button
               type="submit"
-              className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700"
+              className="w-full rounded bg-emerald-400 py-2 text-black hover:bg-emerald-300 active:bg-emerald-100 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700"
             >
               {activeTab === 'login' ? 'Login' : 'Register'}
             </button>
           )}
 
           {registered && (
-            <div className="mt-5 rounded-xl bg-emerald-600 p-3 text-white">
+            <div className="mt-5 rounded-xl bg-emerald-400 p-3 text-black dark:bg-emerald-600 dark:text-white">
               Succesfully registered, redirecting...
             </div>
           )}
@@ -211,7 +223,7 @@ const Auth: React.FC = () => {
           <button
             type="button"
             onClick={handleGuestLogin}
-            className="mt-4 block w-full text-center text-emerald-400 hover:underline"
+            className="mt-4 block w-full text-center text-emerald-800 hover:underline dark:text-emerald-400"
           >
             Continue as Guest
           </button>
