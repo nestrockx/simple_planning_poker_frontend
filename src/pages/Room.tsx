@@ -84,10 +84,10 @@ const Room: React.FC = () => {
             {stories.map((story) => (
               <div
                 key={story.id}
-                className={`flex cursor-pointer items-center justify-between rounded text-white ${
+                className={`flex cursor-pointer items-center justify-between rounded text-black dark:text-white ${
                   activeStory?.id === story.id
-                    ? 'bg-emerald-700'
-                    : 'bg-zinc-600 hover:bg-zinc-500'
+                    ? 'bg-emerald-400 dark:bg-emerald-700'
+                    : 'bg-zinc-400 hover:bg-zinc-500 dark:bg-zinc-600 dark:hover:bg-zinc-500'
                 }`}
               >
                 <span
@@ -103,7 +103,7 @@ const Room: React.FC = () => {
                         onClick={() => {
                           handleSummon(story)
                         }}
-                        className="my-1 rounded-xl px-2 py-1 text-sm hover:bg-emerald-950 active:bg-black"
+                        className="my-1 rounded-xl px-2 py-1 text-sm hover:bg-emerald-200 active:bg-emerald-100 dark:hover:bg-emerald-950 dark:active:bg-black"
                         title="Gather all participants to vote"
                       >
                         {summon}
@@ -111,7 +111,7 @@ const Room: React.FC = () => {
                     )}
                     <button
                       onClick={() => handleDeleteStory(story.id)}
-                      className="ml-0 p-2 text-white hover:text-emerald-950 active:text-black"
+                      className="ml-0 p-2 text-black hover:text-emerald-100 active:text-white dark:text-white dark:hover:text-emerald-950 dark:active:text-black"
                       title="Delete story"
                     >
                       <X />
@@ -129,12 +129,12 @@ const Room: React.FC = () => {
             type="text"
             value={newStory}
             onChange={(e) => setNewStory(e.target.value)}
-            className="mt-4 w-full rounded bg-zinc-600 p-2 text-white"
+            className="mt-4 w-full rounded bg-white p-2 dark:bg-zinc-600 dark:text-white"
             placeholder="New Story"
           />
           <button
             type="submit"
-            className="mt-2 w-full rounded-md bg-emerald-600 py-2 text-white transition hover:bg-emerald-700"
+            className="mt-2 w-full rounded-md bg-emerald-400 py-2 transition hover:bg-emerald-300 active:bg-emerald-100 dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700"
           >
             Add Story
           </button>
@@ -231,19 +231,19 @@ const Room: React.FC = () => {
                   key={participantVoted.id}
                   className="flex flex-col items-center justify-center text-center"
                 >
-                  <div className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-b-4 border-neutral-700 bg-gradient-to-br from-neutral-900 to-black shadow-lg">
+                  <div className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-b-4 border-zinc-800 bg-gradient-to-br from-zinc-100 to-white shadow-lg dark:border-b-4 dark:border-neutral-700 dark:bg-gradient-to-br dark:from-neutral-900 dark:to-black">
                     {/* Gloss layer */}
                     <div className="pointer-events-none absolute inset-0">
-                      <div className="absolute top-0 left-0 h-2/3 w-full rounded-b-full bg-white/18 blur-sm" />
-                      <div className="absolute right-2 bottom-2 h-12 w-12 rounded-full bg-white/8 blur-xl" />
+                      <div className="absolute right-0 bottom-0 h-1/3 w-full rounded-b-full bg-zinc-800/18 blur-sm dark:top-0 dark:left-0 dark:h-2/3 dark:bg-white/18" />
+                      <div className="absolute top-2 left-2 h-12 w-12 rounded-full bg-zinc-800/8 blur-xl dark:right-2 dark:bottom-2 dark:bg-white/8" />
                     </div>
 
                     {/* Vote background bubble */}
                     <div
                       className={`flex h-14 w-14 items-center justify-center rounded-3xl transition-all duration-500 ${
                         participantVoted.vote != null
-                          ? 'bg-emerald-800'
-                          : 'bg-zinc-700'
+                          ? 'bg-emerald-400 dark:bg-emerald-800'
+                          : 'bg-zinc-400 dark:bg-zinc-700'
                       }`}
                     >
                       {/* Vote number with fade in/out */}
@@ -267,7 +267,7 @@ const Room: React.FC = () => {
             {/* Reveal Votes Button under boxes */}
             <div className="mt-6 flex flex-col items-center space-y-3">
               <button
-                className="rounded-md border-2 border-emerald-700 bg-zinc-100 px-4 py-2 text-black hover:bg-emerald-400 active:bg-emerald-700 disabled:border-0 disabled:bg-zinc-600 disabled:opacity-50 dark:bg-zinc-950 dark:text-white dark:hover:bg-emerald-900 dark:active:bg-emerald-700"
+                className="rounded-md border-2 border-emerald-700 bg-zinc-100 px-4 py-2 text-black hover:bg-emerald-400 active:bg-emerald-700 disabled:border-0 disabled:bg-zinc-600 disabled:opacity-50 dark:bg-zinc-950 dark:text-white dark:hover:bg-emerald-900 dark:active:bg-emerald-700 dark:disabled:border-0 dark:disabled:bg-zinc-600 dark:disabled:opacity-50"
                 onClick={() => handleRevealVotes(!revealVotes)}
                 disabled={!hasAnyVotes}
               >
@@ -291,7 +291,7 @@ const Room: React.FC = () => {
       <div className="absolute bottom-0 left-[calc(50%)] mb-6 -translate-x-1/2 transform">
         {!revealVotes && (
           <button
-            className="mb-8 rounded-md bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800"
+            className="mb-8 rounded-full bg-emerald-400 px-5 py-3 font-bold text-black hover:bg-emerald-300 dark:bg-emerald-700 dark:text-white dark:hover:bg-emerald-800"
             onClick={handleVote}
           >
             Vote
@@ -300,8 +300,8 @@ const Room: React.FC = () => {
       </div>
       {/* Floating Dialog */}
       {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.6)] backdrop-blur-sm">
-          <div className="w-80 rounded-lg bg-zinc-800 p-6 text-white shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-80 rounded-lg bg-zinc-100 p-6 text-black shadow-lg dark:bg-zinc-800 dark:text-white">
             <h3 className="mb-4 text-lg font-semibold">Select your vote</h3>
 
             <div className="mb-4 grid grid-cols-5 gap-2">
@@ -311,8 +311,8 @@ const Room: React.FC = () => {
                   onClick={() => handleSetUserVoteValue(option)}
                   className={`rounded-md py-2 text-center ${
                     userVoteValue === option
-                      ? 'bg-emerald-700'
-                      : 'bg-zinc-700 hover:bg-zinc-600'
+                      ? 'bg-emerald-400 dark:bg-emerald-700'
+                      : 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600'
                   }`}
                 >
                   {option}
@@ -322,13 +322,13 @@ const Room: React.FC = () => {
 
             <div className="flex justify-end space-x-2">
               <button
-                className="rounded bg-gray-500 px-4 py-2 hover:bg-gray-600"
+                className="rounded bg-zinc-300 px-4 py-2 hover:bg-zinc-400 dark:bg-gray-500 dark:hover:bg-gray-600"
                 onClick={() => setIsDialogOpen(false)}
               >
                 Cancel
               </button>
               <button
-                className="rounded bg-emerald-700 px-4 py-2 hover:bg-emerald-800 disabled:opacity-50"
+                className="rounded bg-emerald-400 px-4 py-2 hover:bg-emerald-500 disabled:opacity-50 dark:bg-emerald-700 dark:hover:bg-emerald-800 dark:disabled:opacity-50"
                 onClick={handleConfirmVote}
                 disabled={userVoteValue === null}
               >

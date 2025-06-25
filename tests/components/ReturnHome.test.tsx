@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import { useNavigate } from 'react-router-dom'
 import ReturnHome from '../../src/components/ReturnHome'
+import '../setupTests'
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')

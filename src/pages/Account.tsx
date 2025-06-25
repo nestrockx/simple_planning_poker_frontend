@@ -90,7 +90,7 @@ const Account: React.FC = () => {
 
         <div className="mt-6 text-right">
           <button
-            className="rounded bg-rose-300 px-4 py-2 text-black transition duration-200 hover:bg-rose-200 active:bg-rose-50 dark:bg-rose-900 dark:text-white dark:hover:bg-rose-950 dark:active:bg-black"
+            className="rounded bg-rose-400 px-4 py-2 text-white transition duration-200 hover:bg-rose-200 active:bg-rose-50 dark:bg-rose-900 dark:text-white dark:hover:bg-rose-950 dark:active:bg-black"
             onClick={handleLogout}
           >
             Logout

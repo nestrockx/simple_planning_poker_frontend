@@ -7,12 +7,17 @@ const DarkModeButtonOffset: React.FC = () => {
 
   useEffect(() => {
     const root = document.documentElement
-    setDark(root.classList.contains('dark'))
+    if (localStorage.getItem('dark')) {
+      setDark(localStorage.getItem('dark') === 'true')
+    } else {
+      setDark(root.classList.contains('dark'))
+    }
   }, [])
 
   const toggleDarkMode = () => {
     const root = document.documentElement
     root.classList.toggle('dark')
+    localStorage.setItem('dark', root.classList.contains('dark').toString())
     setDark(root.classList.contains('dark'))
   }
 

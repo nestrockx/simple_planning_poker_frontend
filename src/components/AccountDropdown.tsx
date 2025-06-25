@@ -21,13 +21,13 @@ const AccountDropdown: React.FC = () => {
             </div>
             <button
               onClick={handleAccountClick}
-              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 dark:active:bg-zinc-500"
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-300 active:bg-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 dark:active:bg-zinc-500"
             >
               Account
             </button>
             <button
               onClick={handleLogout}
-              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 dark:active:bg-zinc-500"
+              className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-300 active:bg-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 dark:active:bg-zinc-500"
             >
               Logout
             </button>
@@ -35,7 +35,7 @@ const AccountDropdown: React.FC = () => {
         ) : (
           <button
             onClick={handleLogin}
-            className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 dark:active:bg-zinc-500"
+            className="w-full rounded-md px-2 py-2 text-left text-sm transition hover:bg-zinc-300 active:bg-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 dark:active:bg-zinc-500"
           >
             Login
           </button>

@@ -17,7 +17,7 @@ const ReturnHomeOffset: React.FC = () => {
         />
         <img
           src="/images/pokerlogo_black.png"
-          alt="Logo"
+          alt="Logo black"
           className="block h-10 w-20 dark:hidden"
         />
       </div>

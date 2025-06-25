@@ -16,7 +16,7 @@ const ReturnHome: React.FC = () => {
         />
         <img
           src="/images/pokerlogo2_black.png"
-          alt="Logo"
+          alt="Logo black"
           className="block h-22 w-23 dark:hidden"
         />
       </div>

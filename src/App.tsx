@@ -14,6 +14,17 @@ const App: React.FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
+    const root = document.documentElement
+    console.log(localStorage.getItem('dark'))
+    if (
+      localStorage.getItem('dark') === 'false' &&
+      root.classList.contains('dark')
+    ) {
+      root.classList.toggle('dark')
+    }
+  }, [])
+
+  useEffect(() => {
     const handleUnauthorized = () => {
       const path = window.location.pathname
       if (
