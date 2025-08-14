@@ -15,7 +15,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const root = document.documentElement
-    console.log(localStorage.getItem('dark'))
+    // console.log(localStorage.getItem('dark'))
     if (
       localStorage.getItem('dark') === 'false' &&
       root.classList.contains('dark')
