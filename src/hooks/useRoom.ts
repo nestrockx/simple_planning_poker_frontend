@@ -251,7 +251,7 @@ export const useRoom = () => {
       {
         WebSocket: WebSocket,
         connectionTimeout: 4000,
-        maxRetries: Infinity,
+        maxRetries: 3,
         debug: false,
       },
     )
