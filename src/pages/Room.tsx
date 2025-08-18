@@ -299,13 +299,13 @@ const Room: React.FC = () => {
           </button>
         )}
       </div>
-      <div className="absolute bottom-0 left-[calc(10%)] mb-6 -translate-x-1/2 transform">
+      <div className="absolute bottom-0 left-[calc(5%)] ms-10 mb-6 -translate-x-1/2 transform">
         {!revealVotes && (
           <button
             className="mb-8 rounded-lg bg-emerald-200 px-5 py-3 font-bold text-black hover:bg-emerald-300 dark:bg-emerald-900 dark:text-white dark:hover:bg-emerald-800"
             onClick={handleLeaveRoom}
           >
-            Leave the room
+            Leave
           </button>
         )}
       </div>

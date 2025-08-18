@@ -242,8 +242,42 @@ export const useRoom = () => {
     return null
   }
 
+  const useReconnectOnFocus = (connectToRoomWebSocket: () => void) => {
+    useEffect(() => {
+      const handleFocus = () => {
+        console.log('Tab focused, checking WebSocket')
+        setWebsocketConnecting(true)
+        connectToRoomWebSocket()
+      }
+
+      window.addEventListener('focus', handleFocus)
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          connectToRoomWebSocket()
+        }
+      })
+
+      return () => {
+        window.removeEventListener('focus', handleFocus)
+        document.removeEventListener('visibilitychange', handleFocus)
+      }
+    }, [connectToRoomWebSocket])
+  }
+
   const connectToRoomWebSocket = async () => {
     if (!roomCode) return
+
+    const existing = roomWebSocketRef.current
+
+    if (
+      existing &&
+      (existing.readyState === WebSocket.OPEN ||
+        existing.readyState === WebSocket.CONNECTING)
+    ) {
+      console.log('WebSocket already open/connecting, skipping')
+      setWebsocketConnecting(false)
+      return
+    }
 
     const rws = new ReconnectingWebSocket(
       `wss://${window.location.host}/ws/reveal/${roomCode}/`,
@@ -400,6 +434,8 @@ export const useRoom = () => {
       rws.close()
     }
   }
+
+  useReconnectOnFocus(connectToRoomWebSocket)
 
   const sortParticipantsByNickname = (participants: Participant[]) =>
     [...participants].sort((a, b) =>
