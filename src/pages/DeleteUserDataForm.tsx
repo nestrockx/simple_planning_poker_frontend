@@ -12,7 +12,7 @@ const DeleteUserDataForm: React.FC = () => {
     setMessage('')
 
     try {
-      const response = await fetch('/api/delete-user-data/', {
+      const response = await fetch('/rest/api/delete-user-data/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
