@@ -13,7 +13,7 @@ const DeleteUserDataForm: React.FC = () => {
     setMessage('')
 
     try {
-      const response = await api.post('/api/delete-user-data/', {
+      const response = await api.post('/delete-user-data/', {
         username,
         password,
       })
