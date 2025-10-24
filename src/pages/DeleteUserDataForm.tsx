@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import api from '../api/api'
 
 const DeleteUserDataForm: React.FC = () => {
   const [username, setUsername] = useState('')
@@ -13,15 +12,20 @@ const DeleteUserDataForm: React.FC = () => {
     setMessage('')
 
     try {
-      const response = await api.post('/delete-user-data/', {
-        username,
-        password,
+      const response = await fetch('/api/delete-user/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       })
 
-      if (response.status === 200) {
+      const data = await response.json()
+
+      if (response.ok) {
         setMessage('User and associated data deleted successfully.')
       } else {
-        setMessage('Failed to delete user.')
+        setMessage(data.error || 'Failed to delete user.')
       }
     } catch (err) {
       setMessage('An error occurred. Please try again.')
