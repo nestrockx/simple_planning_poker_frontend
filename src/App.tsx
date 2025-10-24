@@ -8,6 +8,7 @@ import { FaGithubAlt } from 'react-icons/fa'
 import Account from './pages/Account'
 import { IoLogoLinkedin } from 'react-icons/io'
 import Guest from './pages/Guest'
+import DeleteUserDataForm from './pages/DeleteUserDataForm'
 // import { IoLogoLinkedin } from "react-icons/io";
 
 const App: React.FC = () => {
@@ -73,6 +74,7 @@ const App: React.FC = () => {
         <Route path="/start" element={<RoomJoinCreate />} />
         <Route path="/account" element={<Account />} />
         <Route path="/guest" element={<Guest />} />
+        <Route path="/delete-user-data" element={<DeleteUserDataForm />} />
       </Routes>
 
       <footer className="absolute right-0 bottom-0 p-4 text-sm text-zinc-400">
