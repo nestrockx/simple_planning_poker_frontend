@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 import Room from './pages/Room'
-import Auth from './pages/Auth'
 import Home from './pages/Home'
 import RoomJoinCreate from './pages/RoomJoinCreate'
 import { FaGithubAlt } from 'react-icons/fa'
@@ -68,12 +67,12 @@ const App: React.FC = () => {
       </header>
 
       <Routes>
-        <Route path="/login" element={<Auth />} />
+        <Route path="/login" element={<Guest />} />
         <Route path="/" element={<Home />} />
         <Route path="/room/:roomCode" element={<Room />} />
         <Route path="/start" element={<RoomJoinCreate />} />
         <Route path="/account" element={<Account />} />
-        <Route path="/guest" element={<Guest />} />
+        {/* <Route path="/guest" element={<Guest />} /> */}
         <Route path="/delete-user-data" element={<DeleteUserDataForm />} />
       </Routes>
 
