@@ -67,6 +67,13 @@ export const useRoom = () => {
     connect()
   }, [query.isSuccess])
 
+  const webSocketSend = async (message: string) => {
+    if (roomWebSocketRef.current?.readyState !== WebSocket.OPEN) {
+      await connectToRoomWebSocket()
+    }
+    roomWebSocketRef.current?.send(message)
+  }
+
   const handleAddP = () => {
     // console.log('Adding participant to the room')
 
@@ -75,7 +82,7 @@ export const useRoom = () => {
         // Send the add_p action to the WebSocket server
         // console.log('Sending add_p action')
         if (activeStory !== null) {
-          roomWebSocketRef.current.send(
+          webSocketSend(
             JSON.stringify({
               action: 'add_p',
               story_id: activeStory?.id,
@@ -506,7 +513,7 @@ export const useRoom = () => {
     }
     // setStories((prevStories) => [...prevStories, newStoryItem])
 
-    roomWebSocketRef.current?.send(
+    webSocketSend(
       JSON.stringify({
         action: 'add_story',
         story_id: newStoryItem.id,
@@ -540,7 +547,7 @@ export const useRoom = () => {
       .catch((err) => {
         console.error(err)
       })
-    roomWebSocketRef.current?.send(
+    webSocketSend(
       JSON.stringify({
         action: 'remove_story',
         story_id: storyId,
@@ -555,7 +562,7 @@ export const useRoom = () => {
 
   const handleLeaveRoom = () => {
     if (roomWebSocketRef.current?.readyState === WebSocket.OPEN) {
-      roomWebSocketRef.current.send(
+      webSocketSend(
         JSON.stringify({
           action: 'remove_p',
           story_id: activeStory?.id,
@@ -588,7 +595,7 @@ export const useRoom = () => {
       .then(() => {
         if (roomWebSocketRef.current?.readyState === WebSocket.OPEN) {
           if (activeStory?.id != null) {
-            roomWebSocketRef.current.send(
+            webSocketSend(
               JSON.stringify({
                 action: 'vote',
                 story_id: activeStory.id,
@@ -609,14 +616,14 @@ export const useRoom = () => {
     if (roomWebSocketRef.current?.readyState === WebSocket.OPEN) {
       if (activeStory?.id != null) {
         if (revealVotesChange) {
-          roomWebSocketRef.current.send(
+          webSocketSend(
             JSON.stringify({
               story_id: activeStory.id,
               action: 'reveal',
             }),
           )
         } else {
-          roomWebSocketRef.current.send(
+          webSocketSend(
             JSON.stringify({
               story_id: activeStory.id,
               action: 'unreveal',
@@ -648,7 +655,7 @@ export const useRoom = () => {
             console.error(err)
           })
 
-        roomWebSocketRef.current?.send(
+        webSocketSend(
           JSON.stringify({
             story_id: activeStory?.id,
             action: 'reset',
@@ -694,7 +701,7 @@ export const useRoom = () => {
 
   const handleSummon = (story: Story) => {
     if (roomWebSocketRef.current?.readyState === WebSocket.OPEN) {
-      roomWebSocketRef.current.send(
+      webSocketSend(
         JSON.stringify({
           story_id: story.id,
           title: story.title,
